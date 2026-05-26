@@ -7,7 +7,8 @@ import ClinicalTrials from '@/pages/ClinicalTrials'
 import SystemConfig from '@/pages/SystemConfig'
 import { searchLiterature } from '@/lib/api'
 import { logSearch } from '@/lib/supabase'
-import type { Article, Page } from '@/types'
+import { extractResearchContext } from '@/lib/entityExtractor'
+import type { Article, Page, ResearchContext } from '@/types'
 
 const HISTORY_KEY = 'novu_search_history'
 const MAX_HISTORY = 8
@@ -26,10 +27,20 @@ export default function App() {
   const [headerInput, setHeaderInput] = useState('')
   const [dashQuery, setDashQuery] = useState('')
   const [dashArticles, setDashArticles] = useState<Article[]>([])
+  const [researchContext, setResearchContext] = useState<ResearchContext>({
+    gene: null, variants: [], proteinName: null
+  })
   const [dashLoading, setDashLoading] = useState(false)
   const [showHistory, setShowHistory] = useState(false)
   const [history, setHistory] = useState<string[]>([])
   const searchRef = useRef<HTMLDivElement>(null)
+
+  // Update researchContext when articles change
+  useEffect(() => {
+    if (dashArticles.length > 0) {
+      setResearchContext(extractResearchContext(dashArticles))
+    }
+  }, [dashArticles])
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -144,6 +155,7 @@ export default function App() {
         {page === 'genomic' && (
           <Dashboard
             articles={dashArticles}
+            researchContext={researchContext}
             loading={dashLoading}
             query={dashQuery}
             onSearch={handleSearch}

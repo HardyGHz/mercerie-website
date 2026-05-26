@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import type { Article, Page } from '@/types'
+import type { Article, Page, ResearchContext } from '@/types'
 import { logBrowse } from '@/lib/supabase'
 
 interface Props {
   articles: Article[]
+  researchContext: ResearchContext
   loading: boolean
   query: string
   onSearch: (q: string) => void
@@ -30,7 +31,7 @@ function getTs() {
   return `[${n.getHours().toString().padStart(2, '0')}:${n.getMinutes().toString().padStart(2, '0')}:${n.getSeconds().toString().padStart(2, '0')}]`
 }
 
-export default function Dashboard({ articles, loading, query, onSearch, onNavigate }: Props) {
+export default function Dashboard({ articles, researchContext, loading, query, onSearch, onNavigate }: Props) {
   const [logs, setLogs] = useState<LogEntry[]>(INITIAL_LOGS)
   const [terminalCmd, setTerminalCmd] = useState('')
   const logRef = useRef<HTMLDivElement>(null)
@@ -47,31 +48,34 @@ export default function Dashboard({ articles, loading, query, onSearch, onNaviga
 
   // Search lifecycle → agent log entries
   useEffect(() => {
-    const wasLoading = prevLoadingRef.current
-    prevLoadingRef.current = loading
-
-    if (loading && !wasLoading && query) {
+    if (loading && !prevLoadingRef.current) {
       // Search just started
       const t = getTs()
       addLog(`${t} QUERY RECEIVED: "${query}"`, 'text-secondary')
+      
       const t1 = setTimeout(() => addLog(`>> CALLING NOVU_BRAIN...`, 'text-outline'), 350)
       const t2 = setTimeout(() => addLog(`${getTs()} SEARCHING PUBMED...`, 'text-secondary'), 800)
       const t3 = setTimeout(() => addLog(`>> Querying NCBI E-utilities...`, 'text-outline'), 1400)
+      
+      prevLoadingRef.current = true;
       return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3) }
     }
 
-    if (!loading && wasLoading) {
+    if (!loading && prevLoadingRef.current) {
       // Search just finished
       const t = getTs()
-      setTimeout(() => addLog(`${t} FOUND ${articles.length} RESULTS`, 'text-secondary'), 80)
-      setTimeout(() => addLog(`>> RANKING BY RELEVANCE...`, 'text-outline'), 340)
+      addLog(`${t} FOUND ${articles.length} RESULTS`, 'text-secondary')
+      addLog(`>> RANKING BY RELEVANCE...`, 'text-outline')
+      
       if (articles[0]?.title) {
         const title = articles[0].title.slice(0, 50)
-        setTimeout(() => addLog(`${getTs()} TOP: "${title}..."`, 'text-tertiary'), 680)
+        addLog(`${getTs()} TOP: "${title}..."`, 'text-tertiary')
       }
-      setTimeout(() => addLog(`>> awaiting next query`, 'text-outline'), 1000)
+      addLog(`>> awaiting next query`, 'text-outline')
+      
+      prevLoadingRef.current = false;
     }
-  }, [loading]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [loading, articles, query, addLog])
 
   function handleTerminalKey(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key !== 'Enter') return
@@ -101,11 +105,16 @@ export default function Dashboard({ articles, loading, query, onSearch, onNaviga
       <div className="bento-grid">
 
         {/* ── SEC-04 // PROTEOMICS ── */}
-        <div className="col-span-8 row-span-7 bg-[#18181b] border border-[#27272a] p-4 relative overflow-hidden group">
+        <div 
+          className="col-span-8 row-span-7 bg-[#18181b] border border-[#27272a] p-4 relative overflow-hidden group cursor-pointer hover:border-primary transition-all duration-300"
+          onClick={() => onNavigate('protein')}
+        >
           <div className="flex justify-between items-start mb-4">
             <div>
               <span className="font-label-caps text-label-caps text-tertiary">SEC-04 // PROTEOMICS</span>
-              <h2 className="font-headline-md text-headline-md text-on-surface mt-1 uppercase">RECOMBINANT P53-L2 FOLD</h2>
+              <h2 className="font-headline-md text-headline-md text-on-surface mt-1 uppercase">
+                RECOMBINANT {researchContext.proteinName ?? 'P53'}-L2 FOLD
+              </h2>
             </div>
             <div className="flex gap-2">
               <span className="font-data-md text-data-md text-outline border border-outline-variant px-2 py-1">PDB: 2OCJ</span>
@@ -186,42 +195,47 @@ export default function Dashboard({ articles, loading, query, onSearch, onNaviga
         </div>
 
         {/* ── SEC-02 // GENOMICS ── */}
-        <div className="col-span-4 row-span-5 bg-[#18181b] border border-[#27272a] p-4 flex flex-col">
+        <div 
+          className="col-span-4 row-span-5 bg-[#18181b] border border-[#27272a] p-4 flex flex-col cursor-pointer hover:border-primary transition-all duration-300"
+          onClick={() => onNavigate('genomic')}
+        >
           <div className="flex justify-between items-center mb-4 shrink-0">
-            <span className="font-label-caps text-label-caps text-primary">SEC-02 // GENOMICS</span>
+            <span className="font-label-caps text-label-caps text-primary">SEC-02 // GENOMICS {researchContext.gene ? `(${researchContext.gene})` : ''}</span>
             <span className="material-symbols-outlined text-outline text-lg">genetics</span>
           </div>
           <div className="flex-1 overflow-x-auto">
-            <table className="w-full text-left font-data-md text-[12px]">
-              <thead>
-                <tr className="text-outline border-b border-outline-variant">
-                  <th className="pb-2 font-medium">VARIANT</th>
-                  <th className="pb-2 font-medium">FREQ</th>
-                  <th className="pb-2 font-medium">CLINVAR</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-outline-variant/10">
-                {[
-                  { id: 'R175H', freq: '0.024', status: 'PATHOGENIC', cls: 'bg-error/10 text-error border-error/20' },
-                  { id: 'R273H', freq: '0.019', status: 'PATHOGENIC', cls: 'bg-error/10 text-error border-error/20' },
-                  { id: 'R248Q', freq: '0.015', status: 'VUS',        cls: 'bg-tertiary/10 text-tertiary border-tertiary/20' },
-                  { id: 'Y220C', freq: '0.008', status: 'BENIGN',     cls: 'bg-secondary/10 text-secondary border-secondary/20' },
-                ].map(v => (
-                  <tr key={v.id}>
-                    <td className="py-2 text-primary">{v.id}</td>
-                    <td className="py-2 text-on-surface">{v.freq}</td>
-                    <td className="py-2">
-                      <span className={`px-1 border ${v.cls}`}>{v.status}</span>
-                    </td>
+            {researchContext.variants.length > 0 ? (
+              <table className="w-full text-left font-data-md text-[12px]">
+                <thead>
+                  <tr className="text-outline border-b border-outline-variant">
+                    <th className="pb-2 font-medium">VARIANT</th>
+                    <th className="pb-2 font-medium">FREQ</th>
+                    <th className="pb-2 font-medium">CLINVAR</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-outline-variant/10">
+                  {researchContext.variants.map(v => (
+                    <tr key={v.id}>
+                      <td className="py-2 text-primary">{v.id}</td>
+                      <td className="py-2 text-on-surface">{v.freq}</td>
+                      <td className="py-2">
+                        <span className={`px-1 border ${v.cls}`}>{v.status}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="h-full flex items-center justify-center text-outline text-[10px] italic">NO VARIANT DATA</div>
+            )}
           </div>
         </div>
 
         {/* ── SEC-01 // LITERATURE ── */}
-        <div className="col-span-4 row-span-5 bg-[#18181b] border border-[#27272a] p-4 flex flex-col overflow-hidden">
+        <div 
+          className="col-span-4 row-span-5 bg-[#18181b] border border-[#27272a] p-4 flex flex-col overflow-hidden cursor-pointer hover:border-primary transition-all duration-300"
+          onClick={() => onNavigate('literature')}
+        >
           <div className="flex justify-between items-center mb-4 shrink-0">
             <span className="font-label-caps text-label-caps text-on-surface-variant">SEC-01 // LITERATURE</span>
             <span className="material-symbols-outlined text-outline text-lg">menu_book</span>
@@ -229,7 +243,6 @@ export default function Dashboard({ articles, loading, query, onSearch, onNaviga
 
           <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
             {loading ? (
-              // Skeleton loading state
               <div className="space-y-4">
                 {[0, 1, 2].map(i => (
                   <div key={i} className="border-l-2 border-outline-variant pl-3 py-1">
@@ -257,7 +270,6 @@ export default function Dashboard({ articles, loading, query, onSearch, onNaviga
                 ))}
               </div>
             ) : (
-              // Default static preview before first search completes
               <div className="space-y-4">
                 {[
                   { source: 'Nature Genetics', time: '2h ago',  title: 'Novel structural insights into p53 inactivation mechanisms...' },
@@ -273,7 +285,6 @@ export default function Dashboard({ articles, loading, query, onSearch, onNaviga
             )}
           </div>
 
-          {/* Query label */}
           {query && (
             <div className="mt-2 shrink-0">
               <span className="font-data-md text-[10px] text-outline-variant truncate block">
