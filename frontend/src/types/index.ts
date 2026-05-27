@@ -5,13 +5,14 @@ export interface Article {
   journal: string | null
   pubdate: string | null
   doi: string | null
-  abstract: string | null
+  abstract?: string | null
 }
 
 export interface SearchResponse {
   results: Article[]
   query: string
   count: number
+  researchContext: ResearchContext
 }
 
 export type Page = 'literature' | 'protein' | 'genomic' | 'clinical' | 'system' | 'genomics-explorer'
@@ -19,7 +20,7 @@ export type Page = 'literature' | 'protein' | 'genomic' | 'clinical' | 'system' 
 export interface Variant {
   id: string        // pl. "R175H"
   freq: string      // pl. "0.024" vagy "—" ha nem kinyerhető
-  status: 'PATHOGENIC' | 'VUS' | 'BENIGN'
+  status: 'PATHOGENIC' | 'VUS' | 'BENIGN' | 'LOADING'
   cls: string       // Tailwind color classes
 }
 

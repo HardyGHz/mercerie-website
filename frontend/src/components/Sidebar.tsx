@@ -1,6 +1,7 @@
 import type { Page } from '@/types'
 
 const NAV = [
+  { id: 'genomic'           as Page, label: 'DASHBOARD',  icon: 'dashboard' },
   { id: 'genomics-explorer' as Page, label: 'GENOMICS',   icon: 'genetics' },
   { id: 'literature'        as Page, label: 'LITERATURE', icon: 'menu_book' },
   { id: 'clinical'          as Page, label: 'CLINICAL',   icon: 'clinical_notes' },

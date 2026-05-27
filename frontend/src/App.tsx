@@ -5,9 +5,9 @@ import LiteratureSearch from '@/pages/LiteratureSearch'
 import GenomicsExplorer from '@/pages/GenomicsExplorer'
 import ClinicalTrials from '@/pages/ClinicalTrials'
 import SystemConfig from '@/pages/SystemConfig'
-import { searchLiterature } from '@/lib/api'
+import ProteinViewer from '@/pages/ProteinViewer'
+import { searchLiterature, enrichVariants } from '@/lib/api'
 import { logSearch } from '@/lib/supabase'
-import { extractResearchContext } from '@/lib/entityExtractor'
 import type { Article, Page, ResearchContext } from '@/types'
 
 const HISTORY_KEY = 'novu_search_history'
@@ -35,13 +35,6 @@ export default function App() {
   const [history, setHistory] = useState<string[]>([])
   const searchRef = useRef<HTMLDivElement>(null)
 
-  // Update researchContext when articles change
-  useEffect(() => {
-    if (dashArticles.length > 0) {
-      setResearchContext(extractResearchContext(dashArticles))
-    }
-  }, [dashArticles])
-
   // Close dropdown on outside click
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
@@ -62,10 +55,21 @@ export default function App() {
     setHistory(loadHistory())
     setDashLoading(true)
     setDashQuery(q)
+    setDashArticles([])
+    setResearchContext({ gene: null, variants: [], proteinName: null })
     try {
       const res = await searchLiterature(q, 10)
       setDashArticles(res.results)
+      setResearchContext(res.researchContext)
       logSearch(q, res.results.length)
+
+      // Phase 2: enrich variants with ClinVar in background (non-blocking)
+      const pendingIds = res.researchContext.variants.map(v => v.id)
+      if (pendingIds.length > 0) {
+        enrichVariants(res.researchContext.gene, pendingIds)
+          .then(enriched => setResearchContext(prev => ({ ...prev, variants: enriched })))
+          .catch(() => {}) // fail silently — backend already returns VUS as fallback
+      }
     } catch {
       // errors surfaced in agent log via Dashboard
     } finally {
@@ -163,7 +167,7 @@ export default function App() {
           />
         )}
         {page === 'literature' && <LiteratureSearch />}
-        {page === 'protein'    && <SystemConfig />}
+        {page === 'protein'    && <ProteinViewer onNavigate={setPage} />}
         {page === 'clinical'   && <ClinicalTrials />}
         {page === 'system'     && <SystemConfig />}
       </main>

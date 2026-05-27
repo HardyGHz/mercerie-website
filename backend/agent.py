@@ -1,5 +1,6 @@
 """Gemini 3.1 Flash Lite agent with PubMed function calling."""
 
+import asyncio
 import json
 import logging
 import os
@@ -88,8 +89,62 @@ def _build_model() -> genai.GenerativeModel:
     )
 
 
+_LOADING_CLS = "bg-outline/10 text-outline border-outline/20"
+
+
+async def _extract_entities(articles: list[dict]) -> dict | None:
+    """Extract gene, variants (LOADING status), and protein name — no ClinVar."""
+    try:
+        from tools.entity_extractor import extract_research_entities
+        entities = await extract_research_entities(articles)
+        if not entities:
+            return None
+        raw_variants: list[str] = entities.get("variants") or []
+        return {
+            "gene": entities.get("gene"),
+            "variants": [{"id": v, "freq": "—", "status": "LOADING", "cls": _LOADING_CLS} for v in raw_variants],
+            "protein_name": entities.get("protein_name"),
+        }
+    except Exception as e:
+        logger.warning("entity_extraction_failed err=%s", e)
+        return None
+
+
+async def run_enrichment(gene: str | None, variant_ids: list[str]) -> list[dict]:
+    """Enrich variant IDs with ClinVar pathogenicity. Called by the /api/enrichment route."""
+    from tools.clinvar import lookup_variant
+    results = await asyncio.gather(
+        *[lookup_variant(gene, v) for v in variant_ids],
+        return_exceptions=True,
+    )
+    enriched: list[dict] = []
+    for vid, result in zip(variant_ids, results):
+        if isinstance(result, Exception):
+            result = {"status": "VUS", "cls": "bg-tertiary/10 text-tertiary border-tertiary/20"}
+        enriched.append({"id": vid, "freq": "—", **result})
+    return enriched
+
+
+_EMPTY_CONTEXT: dict = {"gene": None, "variants": [], "protein_name": None}
+
+
+def _slim_articles(articles: list[dict]) -> list[dict]:
+    """Strip large fields not needed by the dashboard (abstract, excess authors)."""
+    return [
+        {
+            "pmid": a.get("pmid"),
+            "title": a.get("title"),
+            "authors": (a.get("authors") or [])[:3],
+            "journal": a.get("journal"),
+            "pubdate": a.get("pubdate"),
+            "doi": a.get("doi"),
+        }
+        for a in articles
+    ]
+
+
 async def run_search(user_query: str) -> dict[str, Any]:
-    """Run a full search: query → PMIDs → abstracts. Returns structured result."""
+    """Run a full search: query → PMIDs → abstracts → research context."""
     start = time.monotonic()
 
     # Cache check — skip Gemini/PubMed if we have a fresh result
@@ -97,7 +152,13 @@ async def run_search(user_query: str) -> dict[str, Any]:
     if cached_results is not None:
         latency_ms = int((time.monotonic() - start) * 1000)
         await db.log_search(user_query, len(cached_results), latency_ms, cached=True)
-        return {"results": cached_results, "query": user_query, "count": len(cached_results)}
+        research_context = await _extract_entities(cached_results)
+        return {
+            "results": _slim_articles(cached_results),
+            "query": user_query,
+            "count": len(cached_results),
+            "research_context": research_context or _EMPTY_CONTEXT,
+        }
 
     model = _build_model()
     chat = model.start_chat()
@@ -139,12 +200,16 @@ async def run_search(user_query: str) -> dict[str, Any]:
     latency_ms = int((time.monotonic() - start) * 1000)
     logger.info("search_done query=%s latency_ms=%d count=%d", user_query[:60], latency_ms, len(articles))
 
-    # Cache result + log (fire-and-forget)
-    await db.set_cache(user_query, articles)
-    await db.log_search(user_query, len(articles), latency_ms, cached=False)
+    # Entity extraction + cache + log run concurrently
+    research_context, _, _ = await asyncio.gather(
+        _extract_entities(articles),
+        db.set_cache(user_query, articles),
+        db.log_search(user_query, len(articles), latency_ms, cached=False),
+    )
 
     return {
-        "results": articles,
+        "results": _slim_articles(articles),
         "query": user_query,
         "count": len(articles),
+        "research_context": research_context or _EMPTY_CONTEXT,
     }

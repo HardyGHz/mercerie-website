@@ -44,12 +44,27 @@ class Article(BaseModel):
     journal: str | None
     pubdate: str | None
     doi: str | None
-    abstract: str | None
+
+class VariantInfo(BaseModel):
+    id: str
+    freq: str
+    status: str
+    cls: str
+
+class VariantEnrichRequest(BaseModel):
+    gene: str | None = None
+    variants: list[str]  # variant ID-k, pl. ["R175H", "G245S"]
+
+class ResearchContext(BaseModel):
+    gene: str | None
+    variants: list[VariantInfo]
+    protein_name: str | None
 
 class SearchResponse(BaseModel):
     results: list[Article]
     query: str
     count: int
+    research_context: ResearchContext
 
 # ─── App ────────────────────────────────────────────────────────────────────
 
@@ -93,10 +108,23 @@ async def search(req: SearchRequest) -> Any:
         raise HTTPException(status_code=500, detail=f"Search failed: {e}")
 
 
+@app.post("/api/enrichment", response_model=list[VariantInfo])
+async def enrichment(req: VariantEnrichRequest) -> Any:
+    """Enrich variant IDs with ClinVar pathogenicity data."""
+    if not req.variants:
+        return []
+    try:
+        from agent import run_enrichment
+        return await run_enrichment(req.gene, req.variants)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Enrichment failed: {e}")
+
+
 @app.post("/api/search/direct", response_model=SearchResponse)
 async def search_direct(req: SearchRequest) -> Any:
     """Direct PubMed search without AI agent (for testing)."""
     from tools.pubmed import search_pubmed, fetch_article_abstracts
+    from agent import _slim_articles, _EMPTY_CONTEXT
     pmids = await search_pubmed(req.query, req.max_results)
     articles = await fetch_article_abstracts(pmids)
-    return {"results": articles, "query": req.query, "count": len(articles)}
+    return {"results": _slim_articles(articles), "query": req.query, "count": len(articles), "research_context": _EMPTY_CONTEXT}

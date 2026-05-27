@@ -1,7 +1,17 @@
-import type { SearchResponse } from '@/types'
+import type { SearchResponse, Variant } from '@/types'
 import { logError } from '@/lib/supabase'
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
+
+export async function enrichVariants(gene: string | null, variantIds: string[]): Promise<Variant[]> {
+  const res = await fetch(`${API_BASE}/api/enrichment`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ gene, variants: variantIds }),
+  })
+  if (!res.ok) throw new Error(`Enrichment error: ${res.status}`)
+  return res.json()
+}
 
 export async function searchLiterature(query: string, maxResults = 10): Promise<SearchResponse> {
   try {
@@ -15,7 +25,18 @@ export async function searchLiterature(query: string, maxResults = 10): Promise<
       logError('api_error', msg, { query, status: res.status })
       throw new Error(msg)
     }
-    return res.json()
+    const data = await res.json()
+    const rc = data.research_context
+    return {
+      results: data.results,
+      query: data.query,
+      count: data.count,
+      researchContext: {
+        gene: rc?.gene ?? null,
+        variants: (rc?.variants ?? []) as Variant[],
+        proteinName: rc?.protein_name ?? null,
+      },
+    }
   } catch (err) {
     if (err instanceof Error && !err.message.startsWith('API error:')) {
       logError('fetch_error', err.message, { query })

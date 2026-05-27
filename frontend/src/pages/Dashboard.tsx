@@ -197,7 +197,7 @@ export default function Dashboard({ articles, researchContext, loading, query, o
         {/* ── SEC-02 // GENOMICS ── */}
         <div 
           className="col-span-4 row-span-5 bg-[#18181b] border border-[#27272a] p-4 flex flex-col cursor-pointer hover:border-primary transition-all duration-300"
-          onClick={() => onNavigate('genomic')}
+          onClick={() => onNavigate('genomics-explorer')}
         >
           <div className="flex justify-between items-center mb-4 shrink-0">
             <span className="font-label-caps text-label-caps text-primary">SEC-02 // GENOMICS {researchContext.gene ? `(${researchContext.gene})` : ''}</span>
@@ -219,7 +219,10 @@ export default function Dashboard({ articles, researchContext, loading, query, o
                       <td className="py-2 text-primary">{v.id}</td>
                       <td className="py-2 text-on-surface">{v.freq}</td>
                       <td className="py-2">
-                        <span className={`px-1 border ${v.cls}`}>{v.status}</span>
+                        {v.status === 'LOADING'
+                          ? <span className="px-1 border border-outline/20 text-outline animate-pulse">…</span>
+                          : <span className={`px-1 border ${v.cls}`}>{v.status}</span>
+                        }
                       </td>
                     </tr>
                   ))}
