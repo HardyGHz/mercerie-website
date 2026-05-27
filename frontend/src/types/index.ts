@@ -15,7 +15,7 @@ export interface SearchResponse {
   researchContext: ResearchContext
 }
 
-export type Page = 'literature' | 'protein' | 'genomic' | 'clinical' | 'system' | 'genomics-explorer'
+export type Page = 'literature' | 'protein' | 'genomic' | 'clinical' | 'system' | 'genomics-explorer' | 'instrument'
 
 export interface Variant {
   id: string        // pl. "R175H"

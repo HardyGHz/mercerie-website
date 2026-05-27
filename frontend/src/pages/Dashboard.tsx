@@ -1,4 +1,3 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
 import type { Article, Page, ResearchContext } from '@/types'
 import { logBrowse } from '@/lib/supabase'
 
@@ -11,216 +10,110 @@ interface Props {
   onNavigate: (page: Page) => void
 }
 
-interface LogEntry { text: string; cls: string }
-
-const INITIAL_LOGS: LogEntry[] = [
-  { text: '[09:21:04] INITIALIZING NOVU_CORE_OS...', cls: 'text-secondary' },
-  { text: '>> Handshaking with SEC-04 proteomics node...', cls: 'text-outline' },
-  { text: '[09:21:05] CONNECTION ESTABLISHED (latency: 12ms)', cls: 'text-secondary' },
-  { text: '>> Fetching variant table for TP53 loci...', cls: 'text-outline' },
-  { text: '[09:21:08] PARSING 42,019 DATA POINTS...', cls: 'text-tertiary' },
-  { text: '>> Found pathogenic mismatch at C.124A>T', cls: 'text-on-surface' },
-  { text: '[09:21:12] WARNING: ANOMALOUS BINDING DETECTED', cls: 'text-error' },
-  { text: '>> Re-evaluating docking matrix...', cls: 'text-outline' },
-  { text: '>> Optimizing molecular dynamics...', cls: 'text-outline' },
-  { text: '[09:21:15] SIMULATION STEP 01-A COMPLETE', cls: 'text-secondary' },
-]
-
-function getTs() {
-  const n = new Date()
-  return `[${n.getHours().toString().padStart(2, '0')}:${n.getMinutes().toString().padStart(2, '0')}:${n.getSeconds().toString().padStart(2, '0')}]`
-}
-
-export default function Dashboard({ articles, researchContext, loading, query, onSearch, onNavigate }: Props) {
-  const [logs, setLogs] = useState<LogEntry[]>(INITIAL_LOGS)
-  const [terminalCmd, setTerminalCmd] = useState('')
-  const logRef = useRef<HTMLDivElement>(null)
-  const prevLoadingRef = useRef(false)
-
-  const addLog = useCallback((text: string, cls: string) => {
-    setLogs(prev => [...prev, { text, cls }])
-  }, [])
-
-  // Auto-scroll log
-  useEffect(() => {
-    if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight
-  }, [logs])
-
-  // Search lifecycle → agent log entries
-  useEffect(() => {
-    if (loading && !prevLoadingRef.current) {
-      // Search just started
-      const t = getTs()
-      addLog(`${t} QUERY RECEIVED: "${query}"`, 'text-secondary')
-      
-      const t1 = setTimeout(() => addLog(`>> CALLING NOVU_BRAIN...`, 'text-outline'), 350)
-      const t2 = setTimeout(() => addLog(`${getTs()} SEARCHING PUBMED...`, 'text-secondary'), 800)
-      const t3 = setTimeout(() => addLog(`>> Querying NCBI E-utilities...`, 'text-outline'), 1400)
-      
-      prevLoadingRef.current = true;
-      return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3) }
-    }
-
-    if (!loading && prevLoadingRef.current) {
-      // Search just finished
-      const t = getTs()
-      addLog(`${t} FOUND ${articles.length} RESULTS`, 'text-secondary')
-      addLog(`>> RANKING BY RELEVANCE...`, 'text-outline')
-      
-      if (articles[0]?.title) {
-        const title = articles[0].title.slice(0, 50)
-        addLog(`${getTs()} TOP: "${title}..."`, 'text-tertiary')
-      }
-      addLog(`>> awaiting next query`, 'text-outline')
-      
-      prevLoadingRef.current = false;
-    }
-  }, [loading, articles, query, addLog])
-
-  function handleTerminalKey(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key !== 'Enter') return
-    const cmd = terminalCmd.trim()
-    setTerminalCmd('')
-    if (!cmd) return
-
-    if (cmd === 'help') {
-      addLog(`>> Available commands:`, 'text-outline')
-      addLog(`>>   <query>   — search PubMed via NOVU_BRAIN`, 'text-outline')
-      addLog(`>>   clear     — clear terminal`, 'text-outline')
-      addLog(`>>   help      — show this help`, 'text-outline')
-      return
-    }
-    if (cmd === 'clear') {
-      setLogs(INITIAL_LOGS)
-      return
-    }
-
-    addLog(`>> ${cmd}`, 'text-on-surface')
-    onSearch(cmd)
-  }
-
+export default function Dashboard({ articles, researchContext, loading, query, onNavigate }: Props) {
   return (
-    <div className="p-margin-desktop bg-surface overflow-hidden relative" style={{ height: 'calc(100vh - 64px)' }}>
-      {/* Bento Grid */}
-      <div className="bento-grid">
+    <div className="p-3 bg-[#09090b] overflow-hidden relative" style={{ height: '100%' }}>
 
-        {/* ── SEC-04 // PROTEOMICS ── */}
-        <div 
-          className="col-span-8 row-span-7 bg-[#18181b] border border-[#27272a] p-4 relative overflow-hidden group cursor-pointer hover:border-primary transition-all duration-300"
+      {/* Corner crosshairs */}
+      <div className="absolute top-3 left-3 w-3 h-3 border-t border-l border-[#424754] pointer-events-none z-10" />
+      <div className="absolute top-3 right-3 w-3 h-3 border-t border-r border-[#424754] pointer-events-none z-10" />
+      <div className="absolute bottom-3 left-3 w-3 h-3 border-b border-l border-[#424754] pointer-events-none z-10" />
+      <div className="absolute bottom-3 right-3 w-3 h-3 border-b border-r border-[#424754] pointer-events-none z-10" />
+
+      {/* Bento grid */}
+      <div className="bento-grid" style={{ height: '100%', gridTemplateRows: '7fr 5fr' }}>
+
+        {/* ── SEC-04 // PROTEOMICS (top-left, big) ── */}
+        <div
+          className="col-span-8 bg-[#18181b] border border-[#27272a] p-4 relative overflow-hidden group cursor-pointer hover:border-[#4edea3]/40 transition-all duration-300 flex flex-col"
           onClick={() => onNavigate('protein')}
         >
-          <div className="flex justify-between items-start mb-4">
+          {/* Corner pips */}
+          <div className="absolute top-2 left-2 w-3 h-3 border-t border-l border-[#c0c1ff]/40" />
+          <div className="absolute top-2 right-2 w-3 h-3 border-t border-r border-[#c0c1ff]/40" />
+          <div className="absolute bottom-2 left-2 w-3 h-3 border-b border-l border-[#c0c1ff]/40" />
+          <div className="absolute bottom-2 right-2 w-3 h-3 border-b border-r border-[#c0c1ff]/40" />
+
+          <div className="flex justify-between items-start mb-3 shrink-0">
             <div>
-              <span className="font-label-caps text-label-caps text-tertiary">SEC-04 // PROTEOMICS</span>
-              <h2 className="font-headline-md text-headline-md text-on-surface mt-1 uppercase">
+              <span className="font-label-caps text-[10px] text-[#c0c1ff] tracking-widest">SEC-04 // PROTEOMICS</span>
+              <h2 className="font-headline-md text-[16px] font-semibold text-[#e1e2ec] mt-0.5 uppercase">
                 RECOMBINANT {researchContext.proteinName ?? 'P53'}-L2 FOLD
               </h2>
             </div>
             <div className="flex gap-2">
-              <span className="font-data-md text-data-md text-outline border border-outline-variant px-2 py-1">PDB: 2OCJ</span>
-              <span className="font-data-md text-data-md text-secondary border border-secondary/30 px-2 py-1">RESOLUTION: 1.85Å</span>
+              <span className="font-data-md text-[10px] text-[#8c909f] border border-[#424754] px-2 py-0.5">PDB: 2OCJ</span>
+              <span className="font-data-md text-[10px] text-[#4edea3] border border-[#4edea3]/30 px-2 py-0.5">RES: 1.85Å</span>
             </div>
           </div>
 
-          {/* Viewer */}
-          <div className="w-full bg-black/40 border border-outline-variant/30 flex items-center justify-center relative group-hover:border-tertiary/30 transition-all" style={{ height: 320 }}>
-            <div className="scanline" />
+          {/* Protein image */}
+          <div className="flex-1 bg-black/40 border border-[#424754]/30 flex items-center justify-center relative group-hover:border-[#c0c1ff]/20 transition-all min-h-0">
+            <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.2)_50%)] bg-[length:100%_2px] opacity-40" />
             <img
               className="w-full h-full object-cover opacity-60 mix-blend-screen absolute inset-0"
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2cboae55SBlcg3BsAJecl3QWUfnRbuxmW_t4SlY87lv_xvDbfPZK2HNymv3qQpUst6tyilHSpFDhlIVsc9etJP29wdQLWf6r9iunKQmWlCzV1A7TypPlCqBrgYq6iRKww43WHu7YcXJXFUhieAqtIIp3UYXwSoZAz7VNj5e2y_M2qc8DYEXmQChAVSFZX3a95WoQgYpIwFq4bqNtIQ25B3Br1f0C2PKxaAfHpQ-TWFTRuNEbsOG1jmb_gl__sAr3WHN6AW3ezfqo"
-              alt="Protein structure visualization"
+              alt="Protein structure"
             />
-            <div className="absolute top-2 left-2 w-4 h-4 border-t border-l border-tertiary" />
-            <div className="absolute top-2 right-2 w-4 h-4 border-t border-r border-tertiary" />
-            <div className="absolute bottom-2 left-2 w-4 h-4 border-b border-l border-tertiary" />
-            <div className="absolute bottom-2 right-2 w-4 h-4 border-b border-r border-tertiary" />
+            <div className="absolute top-2 left-2 font-label-caps text-[9px] text-[#c0c1ff]/60 bg-black/60 px-1.5 py-0.5">SEC-04 // ANALYZING...</div>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-4 gap-4 mt-6">
+          {/* Stats row */}
+          <div className="grid grid-cols-4 gap-3 mt-3 shrink-0">
             {[
-              { label: 'Chain Length', value: '393 AA',  color: 'text-on-surface' },
-              { label: 'Helix Index',  value: '12.4%',   color: 'text-on-surface' },
-              { label: 'Sheet Density',value: '31.8%',   color: 'text-on-surface' },
-              { label: 'Binding Aff',  value: '0.08 nM', color: 'text-secondary' },
+              { label: 'Chain Length', value: '393 AA',  cls: 'text-[#e1e2ec]' },
+              { label: 'Helix Index',  value: '12.4%',   cls: 'text-[#e1e2ec]' },
+              { label: 'Sheet Density',value: '31.8%',   cls: 'text-[#e1e2ec]' },
+              { label: 'Binding Aff',  value: '0.08 nM', cls: 'text-[#4edea3]' },
             ].map(s => (
-              <div key={s.label} className="border-l border-tertiary pl-3">
-                <div className="font-label-caps text-[10px] text-outline uppercase">{s.label}</div>
-                <div className={`font-data-lg text-data-lg ${s.color}`}>{s.value}</div>
+              <div key={s.label} className="border-l border-[#c0c1ff]/30 pl-2">
+                <div className="font-label-caps text-[9px] text-[#8c909f] uppercase">{s.label}</div>
+                <div className={`font-data-md text-[13px] font-medium ${s.cls}`}>{s.value}</div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* ── SEC-06 // AGENT_LOG ── */}
-        <div className="col-span-4 row-span-12 bg-[#18181b] border border-[#27272a] flex flex-col overflow-hidden">
-          <div className="p-4 border-b border-[#27272a] flex justify-between items-center bg-surface-container-high/50 shrink-0">
-            <span className="font-label-caps text-label-caps text-secondary">SEC-06 // AGENT_LOG</span>
-            <span className={`w-2 h-2 rounded-full ${loading ? 'bg-secondary animate-pulse' : 'bg-secondary'}`} />
-          </div>
-          <div
-            ref={logRef}
-            className="flex-1 font-data-md text-data-md p-4 overflow-y-auto custom-scrollbar bg-black/20"
-          >
-            {logs.map((log, i) => (
-              <div key={i} className={`${log.cls} ${log.text.startsWith('[') ? 'mb-2' : 'mb-1'}`}>
-                {log.text}
-              </div>
-            ))}
-            {!loading && (
-              <div className="text-on-surface flex items-center gap-1">
-                {'>> awaiting user command'}
-                <span className="terminal-cursor" />
-              </div>
-            )}
-            {loading && (
-              <div className="text-secondary flex items-center gap-2">
-                <span className="animate-pulse">{'>> processing...'}</span>
-              </div>
-            )}
-          </div>
-          <div className="p-4 bg-surface-container-low border-t border-[#27272a] shrink-0">
-            <div className="flex gap-2">
-              <span className="text-secondary font-data-md text-data-md">sys@novu:~$</span>
-              <input
-                type="text"
-                placeholder="type command or search query..."
-                value={terminalCmd}
-                onChange={e => setTerminalCmd(e.target.value)}
-                onKeyDown={handleTerminalKey}
-                className="bg-transparent border-none outline-none font-data-md text-data-md text-on-surface w-full p-0 focus:ring-0 placeholder:text-outline-variant/50"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* ── SEC-02 // GENOMICS ── */}
-        <div 
-          className="col-span-4 row-span-5 bg-[#18181b] border border-[#27272a] p-4 flex flex-col cursor-pointer hover:border-primary transition-all duration-300"
-          onClick={() => onNavigate('genomics-explorer')}
+        {/* ── SEC-02 // GENOMICS (top-right) ── */}
+        <div
+          className="col-span-4 bg-[#18181b] border border-[#27272a] p-4 flex flex-col cursor-pointer hover:border-[#4edea3]/40 transition-all duration-300"
+          onClick={() => onNavigate('genomic')}
         >
-          <div className="flex justify-between items-center mb-4 shrink-0">
-            <span className="font-label-caps text-label-caps text-primary">SEC-02 // GENOMICS {researchContext.gene ? `(${researchContext.gene})` : ''}</span>
-            <span className="material-symbols-outlined text-outline text-lg">genetics</span>
+          <div className="flex justify-between items-center mb-3 shrink-0">
+            <span className="font-label-caps text-[10px] text-[#4edea3] tracking-widest">
+              SEC-02 // GENOMICS {researchContext.gene ? `(${researchContext.gene})` : ''}
+            </span>
+            <span className="material-symbols-outlined text-[#8c909f] text-[16px]">genetics</span>
           </div>
+
           <div className="flex-1 overflow-x-auto">
-            {researchContext.variants.length > 0 ? (
-              <table className="w-full text-left font-data-md text-[12px]">
+            {loading ? (
+              <div className="space-y-2">
+                {[0, 1, 2].map(i => (
+                  <div key={i} className="flex gap-3">
+                    <div className="skeleton h-3 w-16" />
+                    <div className="skeleton h-3 w-8" />
+                    <div className="skeleton h-3 w-20" />
+                  </div>
+                ))}
+              </div>
+            ) : researchContext.variants.length > 0 ? (
+              <table className="w-full text-left font-data-md text-[11px]">
                 <thead>
-                  <tr className="text-outline border-b border-outline-variant">
-                    <th className="pb-2 font-medium">VARIANT</th>
-                    <th className="pb-2 font-medium">FREQ</th>
-                    <th className="pb-2 font-medium">CLINVAR</th>
+                  <tr className="text-[#8c909f] border-b border-[#424754]">
+                    <th className="pb-2 font-label-caps text-[9px]">VARIANT</th>
+                    <th className="pb-2 font-label-caps text-[9px]">FREQ</th>
+                    <th className="pb-2 font-label-caps text-[9px]">CLINVAR</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-outline-variant/10">
+                <tbody className="divide-y divide-[#424754]/20">
                   {researchContext.variants.map(v => (
                     <tr key={v.id}>
-                      <td className="py-2 text-primary">{v.id}</td>
-                      <td className="py-2 text-on-surface">{v.freq}</td>
-                      <td className="py-2">
+                      <td className="py-1.5 text-[#adc6ff]">{v.id}</td>
+                      <td className="py-1.5 text-[#e1e2ec]">{v.freq}</td>
+                      <td className="py-1.5">
                         {v.status === 'LOADING'
-                          ? <span className="px-1 border border-outline/20 text-outline animate-pulse">…</span>
+                          ? <span className="px-1 border border-[#424754] text-[#8c909f] animate-pulse">…</span>
                           : <span className={`px-1 border ${v.cls}`}>{v.status}</span>
                         }
                       </td>
@@ -229,106 +122,81 @@ export default function Dashboard({ articles, researchContext, loading, query, o
                 </tbody>
               </table>
             ) : (
-              <div className="h-full flex items-center justify-center text-outline text-[10px] italic">NO VARIANT DATA</div>
+              <div className="h-full flex items-center justify-center text-[#424754] font-label-caps text-[10px]">
+                NO VARIANT DATA
+              </div>
             )}
           </div>
         </div>
 
-        {/* ── SEC-01 // LITERATURE ── */}
-        <div 
-          className="col-span-4 row-span-5 bg-[#18181b] border border-[#27272a] p-4 flex flex-col overflow-hidden cursor-pointer hover:border-primary transition-all duration-300"
+        {/* ── SEC-01 // LITERATURE (bottom, full width) ── */}
+        <div
+          className="col-span-12 bg-[#18181b] border border-[#27272a] p-4 flex flex-col overflow-hidden cursor-pointer hover:border-[#adc6ff]/30 transition-all duration-300"
           onClick={() => onNavigate('literature')}
         >
-          <div className="flex justify-between items-center mb-4 shrink-0">
-            <span className="font-label-caps text-label-caps text-on-surface-variant">SEC-01 // LITERATURE</span>
-            <span className="material-symbols-outlined text-outline text-lg">menu_book</span>
+          <div className="flex justify-between items-center mb-3 shrink-0">
+            <span className="font-label-caps text-[10px] text-[#adc6ff] tracking-widest">SEC-01 // LITERATURE</span>
+            <div className="flex items-center gap-3">
+              {query && (
+                <span className="font-data-md text-[10px] text-[#8c909f] truncate max-w-48">
+                  QUERY: {query.slice(0, 40)}{query.length > 40 ? '...' : ''}
+                </span>
+              )}
+              <span className="material-symbols-outlined text-[#8c909f] text-[16px]">menu_book</span>
+            </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
+          <div className="flex-1 overflow-y-auto custom-scrollbar">
             {loading ? (
-              <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-4">
                 {[0, 1, 2].map(i => (
-                  <div key={i} className="border-l-2 border-outline-variant pl-3 py-1">
-                    <div className="skeleton h-2 w-28 mb-2" />
+                  <div key={i} className="border-l-2 border-[#424754] pl-3">
+                    <div className="skeleton h-2 w-24 mb-2" />
                     <div className="skeleton h-3 w-full mb-1" />
                     <div className="skeleton h-3 w-4/5" />
                   </div>
                 ))}
               </div>
             ) : articles.length > 0 ? (
-              <div className="space-y-4">
-                {articles.slice(0, 3).map((a, i) => (
+              <div className="grid grid-cols-3 gap-4">
+                {articles.slice(0, 6).map((a, i) => (
                   <div
                     key={a.pmid || i}
-                    className="border-l-2 border-outline-variant pl-3 py-1 hover:border-primary transition-colors cursor-pointer"
-                    onClick={() => { logBrowse(a.pmid, a.title ?? null, a.journal ?? null, a.pubdate ?? null, query); onNavigate('literature') }}
+                    className="border-l-2 border-[#424754] pl-3 hover:border-[#adc6ff] transition-colors"
+                    onClick={e => {
+                      e.stopPropagation()
+                      logBrowse(a.pmid, a.title ?? null, a.journal ?? null, a.pubdate ?? null, query)
+                      onNavigate('literature')
+                    }}
                   >
-                    <div className="text-[10px] text-outline font-data-md">
-                      {a.journal ?? 'PubMed'} · {a.pubdate ?? ''}
+                    <div className="font-data-md text-[9px] text-[#8c909f]">
+                      {a.journal ?? 'PubMed'}{a.pubdate ? ` · ${a.pubdate}` : ''}
                     </div>
-                    <div className="font-data-md text-body-md text-on-surface leading-tight mt-1">
-                      {(a.title ?? '').slice(0, 72)}{(a.title?.length ?? 0) > 72 ? '...' : ''}
+                    <div className="font-data-md text-[12px] text-[#e1e2ec] leading-snug mt-0.5">
+                      {(a.title ?? '').slice(0, 80)}{(a.title?.length ?? 0) > 80 ? '...' : ''}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-4">
                 {[
-                  { source: 'Nature Genetics', time: '2h ago',  title: 'Novel structural insights into p53 inactivation mechanisms...' },
-                  { source: 'Cell Reports',    time: '5h ago',  title: 'Chromatin remodeling by the NuRD complex in development...' },
-                  { source: 'Science',         time: '1d ago',  title: 'High-throughput screening of CRISPR-Cas9 libraries...' },
+                  { source: 'Nature Genetics',  time: '2h ago', title: 'Novel structural insights into p53 inactivation mechanisms...' },
+                  { source: 'Cell Reports',      time: '5h ago', title: 'Chromatin remodeling by the NuRD complex in development...'    },
+                  { source: 'Science',           time: '1d ago', title: 'High-throughput screening of CRISPR-Cas9 libraries...'          },
                 ].map((p, i) => (
-                  <div key={i} className="border-l-2 border-outline-variant pl-3 py-1 hover:border-primary transition-colors cursor-pointer" onClick={() => onNavigate('literature')}>
-                    <div className="text-[10px] text-outline font-data-md">{p.source} · {p.time}</div>
-                    <div className="font-data-md text-body-md text-on-surface leading-tight mt-1">{p.title}</div>
+                  <div key={i} className="border-l-2 border-[#424754] pl-3 hover:border-[#adc6ff] transition-colors cursor-pointer"
+                    onClick={e => { e.stopPropagation(); onNavigate('literature') }}
+                  >
+                    <div className="font-data-md text-[9px] text-[#8c909f]">{p.source} · {p.time}</div>
+                    <div className="font-data-md text-[12px] text-[#e1e2ec] leading-snug mt-0.5">{p.title}</div>
                   </div>
                 ))}
               </div>
             )}
           </div>
+        </div>
 
-          {query && (
-            <div className="mt-2 shrink-0">
-              <span className="font-data-md text-[10px] text-outline-variant truncate block">
-                QUERY: {query.slice(0, 40)}{query.length > 40 ? '...' : ''}
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* ── SEC-05 // CLINICAL_PHASE fixed bar ── */}
-      <div className="fixed bottom-0 left-64 right-0 h-16 bg-surface-container-high border-t border-outline-variant px-8 flex items-center justify-between z-30">
-        <div className="flex items-center gap-6">
-          <span className="font-label-caps text-label-caps text-secondary">SEC-05 // CLINICAL_PHASE</span>
-          {[
-            { label: 'PHASE I',   w: 'w-full', active: true },
-            { label: 'PHASE II',  w: 'w-3/4',  active: true },
-            { label: 'PHASE III', w: 'w-0',    active: false },
-          ].map(p => (
-            <div key={p.label} className="flex items-center gap-2">
-              <div className={`h-1 w-12 rounded-full overflow-hidden ${p.active ? 'bg-secondary/40' : 'bg-outline-variant'}`}>
-                <div className={`h-full bg-secondary ${p.w}`} />
-              </div>
-              <span className={`text-[10px] font-data-md ${p.active ? '' : 'text-outline-variant'}`}>{p.label}</span>
-            </div>
-          ))}
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="flex -space-x-2">
-            {[
-              'https://lh3.googleusercontent.com/aida-public/AB6AXuDeDuajvc1-xf9N8-wEXS6NeL6iFMHTzOhrvPI0hj7HMOSJH_asECyB6mjaT3kOf2FaYj9HQt8fbjWv3Pkrs2EReu2hnFEv4LRl_s9l6d5CJJFVBTNytZbV3uALHohAq_UOID7rHQgZFavUKEhGXe1YLzxhuYVw6ro1w1OqaMQj7K6v5zy0n06FkKnc_HKt9nlyWjt9s-9Ck_eYAoxu4lxEOBA3a2F2K85AMenZnHPdMzsUl__EIFqsNWPwNshwz3N_9OvmS6sG-aw',
-              'https://lh3.googleusercontent.com/aida-public/AB6AXuCF6KhPbq0sg0GxqCPiwPssbsnU4NcX69YHcYlzewePsCIZBQG8kBI3oFcKR9dI2WVd3IuHuM4XEuWXRqS8UqmSgkjQsZWVYYRCGHS_mxQ9F4wuBQC0KndTi1FSzTVwo_KPFFlOUIYir-iBsux5lSy7wa6187c2T4htN6MfDdFl20CWcvRVGJutmCL6KogbROa2ly9qbGPdNeZpSzdKWS-wyAPdBOTWObF5_VR3K3ERZGkCL-ZhL40nl4iryX7OEGaiTWOZq3jqvrE',
-              'https://lh3.googleusercontent.com/aida-public/AB6AXuAbVb_wIHK4W0pOVXmhtqnR93ZlCr5XKlkkesByX4uXCgYTRxor3kpDJHiLLHm9MVdfFKI1ICZCt6s_seV03FvDJi-6YB5sxlu8omd7TKshKim8SlDYVU7Am_HRCmHu5dOQVxi87UuA6JueKD4XMOSn6cFWaypF25Ndr6fYePb-3hAfKvnKgVh6BSF82HVvG3E7xFzKWYqUqQKti01W-A7LHcIjwfvY_ufRwSHQ2AWi139dGUkBhCpLwgHrYaOjDy4Ka8yTinFEil0',
-            ].map((src, i) => (
-              <img key={i} className="w-6 h-6 rounded-none border border-background object-cover" src={src} alt="" />
-            ))}
-          </div>
-          <button className="bg-secondary text-on-secondary px-4 py-1 font-label-caps text-label-caps hover:brightness-110 transition-all border border-secondary shadow-[0_0_10px_rgba(78,222,163,0.3)]">
-            DEPLOY_COMPOUND
-          </button>
-        </div>
       </div>
     </div>
   )

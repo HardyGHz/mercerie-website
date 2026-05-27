@@ -1,10 +1,21 @@
-import { useState, useMemo, useCallback } from 'react'
-import { Search, ExternalLink, ChevronUp, ChevronDown, ChevronsUpDown, AlertCircle } from 'lucide-react'
-import type { Article } from '@/types'
+import { useState, useCallback, useEffect, useRef } from 'react'
+import { Search, ExternalLink, AlertCircle } from 'lucide-react'
 import { searchLiterature } from '@/lib/api'
+import type { Article } from '@/types'
 
-type SortField = 'title' | 'journal' | 'pubdate'
-type SortDir = 'asc' | 'desc'
+const HISTORY_KEY = 'novu_search_history'
+function loadHistory(): string[] {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) ?? '[]') } catch { return [] }
+}
+function removeFromHistory(q: string): string[] {
+  const h = loadHistory().filter(x => x !== q)
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(h))
+  return h
+}
+function saveToHistory(q: string) {
+  const h = [q, ...loadHistory().filter(x => x !== q)].slice(0, 8)
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(h))
+}
 
 // ─── Sub-components ─────────────────────────────────────────────────────────
 
@@ -37,31 +48,67 @@ function SearchBar({
   value,
   onChange,
   onSearch,
+  onHistoryPick,
   loading,
 }: {
   value: string
   onChange: (v: string) => void
   onSearch: () => void
+  onHistoryPick: (q: string) => void
   loading: boolean
 }) {
   const disabled = loading || !value.trim()
+  const [showHistory, setShowHistory] = useState(false)
+  const [history, setHistory] = useState<string[]>([])
+  const wrapRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setShowHistory(false)
+    }
+    document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [])
+
+  const filtered = history.filter(h => !value || h.toLowerCase().includes(value.toLowerCase()))
+
   return (
     <div className="px-6 py-5 border-b border-[#27272a] shrink-0">
       <div className="flex gap-2">
-        <div className="flex-1 relative">
-          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none" />
+        <div className="flex-1 relative" ref={wrapRef}>
+          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-outline pointer-events-none z-10" />
           <input
             type="text"
             value={value}
             onChange={e => onChange(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && !loading && onSearch()}
+            onFocus={() => { setHistory(loadHistory()); setShowHistory(true) }}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && !loading) { onSearch(); setShowHistory(false) }
+              if (e.key === 'Escape') setShowHistory(false)
+            }}
             placeholder="e.g. CRISPR gene editing, p53 tumor suppressor..."
-            autoFocus
             className="w-full bg-[#18181b] border border-[#27272a] text-on-surface font-data-md text-[12px] py-2.5 pl-8 pr-3 outline-none focus:border-primary transition-colors"
           />
+          {showHistory && filtered.length > 0 && (
+            <div className="absolute top-full left-0 right-0 bg-[#1d2027] border border-[#27272a] border-t-0 z-50">
+              {filtered.map((h, i) => (
+                <div key={i}
+                  className="flex items-center gap-3 px-3 py-2 hover:bg-[#272a31] cursor-pointer group"
+                  onMouseDown={e => { e.preventDefault(); setShowHistory(false); onHistoryPick(h) }}
+                >
+                  <span className="material-symbols-outlined text-[#8c909f] text-[14px]">history</span>
+                  <span className="font-data-md text-[11px] text-[#c2c6d6] group-hover:text-[#e1e2ec] flex-1 truncate">{h}</span>
+                  <span
+                    className="material-symbols-outlined text-[14px] text-[#424754] hover:text-[#e1e2ec] opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+                    onMouseDown={e => { e.preventDefault(); e.stopPropagation(); setHistory(removeFromHistory(h)) }}
+                  >close</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         <button
-          onClick={onSearch}
+          onClick={() => { onSearch(); setShowHistory(false) }}
           disabled={disabled}
           className={[
             'font-label-caps text-label-caps px-5 border transition-all whitespace-nowrap',
@@ -80,191 +127,109 @@ function SearchBar({
   )
 }
 
-function SortIcon({ field, active, dir }: { field: SortField; active: SortField | null; dir: SortDir }) {
-  if (active !== field) return <ChevronsUpDown size={10} className="text-outline-variant ml-1 inline-block" />
-  return dir === 'asc'
-    ? <ChevronUp size={10} className="text-primary ml-1 inline-block" />
-    : <ChevronDown size={10} className="text-primary ml-1 inline-block" />
-}
+function ArticleCard({ article }: { article: Article }) {
+  const [expanded, setExpanded] = useState(false)
+  const authorStr = article.authors.slice(0, 3).join(', ') + (article.authors.length > 3 ? ' et al.' : '')
+  const abstract = article.abstract ?? ''
+  const truncated = abstract.length > 300
 
-function SkeletonRows() {
   return (
-    <>
-      {Array.from({ length: 6 }).map((_, i) => (
-        <tr key={i} className="border-b border-[#27272a]">
-          <td className="p-4 w-[50px]"><div className="skeleton h-[10px] w-10" /></td>
-          <td className="p-4">
-            <div className="skeleton h-[10px] w-3/5 mb-1.5" />
-            <div className="skeleton h-[8px] w-2/5" />
-          </td>
-          <td className="p-4 w-[140px]"><div className="skeleton h-[10px] w-20" /></td>
-          <td className="p-4 w-[180px]"><div className="skeleton h-[10px] w-28" /></td>
-          <td className="p-4 w-[70px]"><div className="skeleton h-[10px] w-10" /></td>
-          <td className="p-4 w-[50px]"><div className="skeleton h-[10px] w-6" /></td>
-        </tr>
-      ))}
-    </>
+    <div className="bg-[#18181b] border border-[#27272a] p-5 hover:border-[#4edea3]/40 transition-all duration-200 group">
+      {/* Header: journal + date */}
+      <div className="flex items-center justify-between mb-2">
+        <span className="font-label-caps text-[9px] text-[#8c909f] tracking-wider">
+          {article.journal ?? 'UNKNOWN JOURNAL'}
+        </span>
+        <span className="font-data-md text-[10px] text-[#8c909f]">
+          {article.pubdate ?? '—'}
+        </span>
+      </div>
+
+      {/* Title */}
+      <h3 className="font-data-md text-[13px] text-[#e1e2ec] leading-relaxed mb-2 group-hover:text-[#4edea3] transition-colors">
+        {article.title ?? '—'}
+      </h3>
+
+      {/* Authors */}
+      <div className="font-data-md text-[10px] text-[#8c909f] mb-3">
+        {authorStr || '—'}
+      </div>
+
+      {/* Abstract */}
+      {abstract && (
+        <div className="font-data-md text-[11px] text-[#8c909f]/80 leading-relaxed mb-3">
+          {expanded || !truncated ? abstract : abstract.slice(0, 300) + '…'}
+          {truncated && (
+            <button
+              onClick={() => setExpanded(e => !e)}
+              className="bg-transparent border-none text-[#adc6ff] cursor-pointer font-data-md text-[9px] px-1 hover:opacity-70 transition-opacity"
+            >
+              {expanded ? '[COLLAPSE]' : '[EXPAND]'}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Footer: PMID + DOI */}
+      <div className="flex items-center gap-4 pt-3 border-t border-[#27272a]">
+        <span className="font-label-caps text-[9px] text-[#424754]">PMID: {article.pmid}</span>
+        {article.doi && (
+          <a
+            href={`https://doi.org/${article.doi}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 font-label-caps text-[9px] text-[#adc6ff] no-underline hover:opacity-70 transition-opacity"
+          >
+            <ExternalLink size={10} />
+            DOI
+          </a>
+        )}
+        <a
+          href={`https://pubmed.ncbi.nlm.nih.gov/${article.pmid}/`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1 font-label-caps text-[9px] text-[#4edea3] no-underline hover:opacity-70 transition-opacity ml-auto"
+        >
+          <ExternalLink size={10} />
+          PUBMED
+        </a>
+      </div>
+    </div>
   )
 }
 
 function EmptyState({ searched }: { searched: boolean }) {
   return (
-    <tr>
-      <td colSpan={6}>
-        <div className="flex flex-col items-center justify-center py-20 gap-3">
-          {searched
-            ? <AlertCircle size={24} strokeWidth={1} className="text-outline-variant" />
-            : <Search size={24} strokeWidth={1} className="text-outline-variant" />
-          }
-          <span className="font-label-caps text-label-caps text-outline">
-            {searched ? 'NO RESULTS FOUND' : 'ENTER A QUERY TO SEARCH PUBMED'}
-          </span>
-          <span className="font-data-md text-[10px] text-outline-variant">
-            {searched ? 'Try broader terms or different MeSH descriptors' : 'Access 36M+ biomedical articles'}
-          </span>
-        </div>
-      </td>
-    </tr>
-  )
-}
-
-function ArticleRow({ article, index }: { article: Article; index: number }) {
-  const [expanded, setExpanded] = useState(false)
-
-  const authorStr = article.authors.slice(0, 3).join(', ') + (article.authors.length > 3 ? ' et al.' : '')
-  const abstract = article.abstract ?? ''
-  const truncated = abstract.length > 160
-
-  return (
-    <tr className="border-b border-[#27272a] hover:bg-[#16161a] transition-colors align-top">
-      <td className="p-3 font-data-md text-[10px] text-outline-variant whitespace-nowrap w-[50px]">
-        {String(index + 1).padStart(2, '0')}
-      </td>
-
-      <td className="p-3">
-        <div className="font-data-md text-[12px] text-on-surface leading-relaxed">
-          {article.title ?? '—'}
-        </div>
-        {abstract && (
-          <div className="font-data-md text-[10px] text-outline leading-relaxed mt-1">
-            {expanded || !truncated ? abstract : abstract.slice(0, 160) + '…'}
-            {truncated && (
-              <button
-                onClick={() => setExpanded(e => !e)}
-                className="bg-transparent border-none text-primary cursor-pointer font-data-md text-[9px] px-1 hover:opacity-70 transition-opacity"
-              >
-                {expanded ? '[LESS]' : '[MORE]'}
-              </button>
-            )}
-          </div>
-        )}
-      </td>
-
-      <td className="p-3 font-data-md text-[10px] text-outline whitespace-nowrap w-[140px]">
-        {authorStr || '—'}
-      </td>
-
-      <td className="p-3 font-data-md text-[10px] text-outline w-[180px]">
-        {article.journal ?? '—'}
-      </td>
-
-      <td className="p-3 font-data-md text-[10px] text-outline whitespace-nowrap w-[70px]">
-        {article.pubdate?.slice(0, 4) ?? '—'}
-      </td>
-
-      <td className="p-3 w-[50px]">
-        {article.doi ? (
-          <a
-            href={`https://doi.org/${article.doi}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            title={article.doi}
-            className="text-primary inline-flex items-center gap-1 font-data-md text-[10px] no-underline hover:opacity-70 transition-opacity"
-          >
-            <ExternalLink size={11} />
-          </a>
-        ) : (
-          <span className="font-data-md text-[10px] text-outline-variant">—</span>
-        )}
-      </td>
-    </tr>
-  )
-}
-
-function ResultsTable({ articles }: { articles: Article[] }) {
-  const [sortField, setSortField] = useState<SortField | null>(null)
-  const [sortDir, setSortDir] = useState<SortDir>('asc')
-
-  const handleSort = useCallback((field: SortField) => {
-    if (sortField === field) {
-      setSortDir(d => d === 'asc' ? 'desc' : 'asc')
-    } else {
-      setSortField(field)
-      setSortDir('asc')
-    }
-  }, [sortField])
-
-  const sorted = useMemo(() => {
-    if (!sortField) return articles
-    return [...articles].sort((a, b) => {
-      const va = (a[sortField] ?? '') as string
-      const vb = (b[sortField] ?? '') as string
-      return sortDir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va)
-    })
-  }, [articles, sortField, sortDir])
-
-  const thBase = 'px-4 py-2.5 font-label-caps text-[9px] text-outline text-left border-b border-[#27272a] bg-[#0d0f14] sticky top-0 z-10 whitespace-nowrap select-none'
-  const thSort = (field: SortField) =>
-    `${thBase} cursor-pointer ${sortField === field ? 'text-primary' : 'hover:text-on-surface-variant'} transition-colors`
-
-  return (
-    <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
-      <colgroup>
-        <col style={{ width: 50 }} />
-        <col />
-        <col style={{ width: 140 }} />
-        <col style={{ width: 180 }} />
-        <col style={{ width: 70 }} />
-        <col style={{ width: 50 }} />
-      </colgroup>
-      <thead>
-        <tr>
-          <th className={thBase}>#</th>
-          <th className={thSort('title')} onClick={() => handleSort('title')}>
-            TITLE <SortIcon field="title" active={sortField} dir={sortDir} />
-          </th>
-          <th className={thBase}>AUTHORS</th>
-          <th className={thSort('journal')} onClick={() => handleSort('journal')}>
-            JOURNAL <SortIcon field="journal" active={sortField} dir={sortDir} />
-          </th>
-          <th className={thSort('pubdate')} onClick={() => handleSort('pubdate')}>
-            YEAR <SortIcon field="pubdate" active={sortField} dir={sortDir} />
-          </th>
-          <th className={thBase}>DOI</th>
-        </tr>
-      </thead>
-      <tbody>
-        {sorted.map((a, i) => (
-          <ArticleRow key={a.pmid} article={a} index={i} />
-        ))}
-      </tbody>
-    </table>
-  )
-}
-
-function ErrorBanner({ message, onDismiss }: { message: string; onDismiss: () => void }) {
-  return (
-    <div className="mx-6 mt-4 px-4 py-2.5 bg-error/10 border border-error/40 text-error font-data-md text-[11px] flex items-center justify-between gap-3 shrink-0">
-      <span className="flex items-center gap-1.5">
-        <AlertCircle size={11} className="inline shrink-0" />
-        {message}
+    <div className="flex flex-col items-center justify-center py-20 gap-3">
+      {searched
+        ? <AlertCircle size={24} strokeWidth={1} className="text-outline-variant" />
+        : <Search size={24} strokeWidth={1} className="text-outline-variant" />
+      }
+      <span className="font-label-caps text-label-caps text-outline">
+        {searched ? 'NO RESULTS FOUND' : 'ENTER A QUERY TO SEARCH PUBMED'}
       </span>
-      <button
-        onClick={onDismiss}
-        className="bg-transparent border-none text-error cursor-pointer font-data-md text-[10px] hover:opacity-70 transition-opacity"
-      >
-        [X]
-      </button>
+      <span className="font-data-md text-[10px] text-outline-variant">
+        {searched ? 'Try broader terms or different MeSH descriptors' : 'Access 36M+ biomedical articles'}
+      </span>
+    </div>
+  )
+}
+
+function SkeletonCards() {
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-6">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="bg-[#18181b] border border-[#27272a] p-5">
+          <div className="flex justify-between mb-3">
+            <div className="skeleton h-[10px] w-24" />
+            <div className="skeleton h-[10px] w-16" />
+          </div>
+          <div className="skeleton h-[13px] w-4/5 mb-2" />
+          <div className="skeleton h-[10px] w-2/5 mb-3" />
+          <div className="skeleton h-[10px] w-full mb-1" />
+          <div className="skeleton h-[10px] w-3/4" />
+        </div>
+      ))}
     </div>
   )
 }
@@ -272,49 +237,46 @@ function ErrorBanner({ message, onDismiss }: { message: string; onDismiss: () =>
 // ─── Main page ───────────────────────────────────────────────────────────────
 
 export default function LiteratureSearch() {
+  const [localQuery, setLocalQuery] = useState('')
+  const [articles, setArticles] = useState<Article[]>([])
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
-  const [articles, setArticles] = useState<Article[]>([])
-  const [searched, setSearched] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [lastQuery, setLastQuery] = useState('')
 
-  const handleSearch = useCallback(async () => {
-    const q = query.trim()
-    if (!q || loading) return
+  const handleSearch = useCallback(async (q: string) => {
+    const trimmed = q.trim()
+    if (!trimmed || loading) return
+    saveToHistory(trimmed)
     setLoading(true)
-    setError(null)
-    setSearched(true)
-    setLastQuery(q)
+    setQuery(trimmed)
+    setArticles([])
     try {
-      const data = await searchLiterature(q, 20)
-      setArticles(data.results ?? [])
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Unknown error')
-      setArticles([])
+      const res = await searchLiterature(trimmed, 20)
+      setArticles(res.results)
+    } catch {
+      // silent
     } finally {
       setLoading(false)
     }
-  }, [query, loading])
+  }, [loading])
+
+  const handleLocalSearch = useCallback(() => handleSearch(localQuery), [localQuery, handleSearch])
 
   return (
     <div className="flex flex-col bg-surface overflow-hidden" style={{ height: 'calc(100vh - 64px)' }}>
-      <TopBar query={lastQuery} count={searched && !loading ? articles.length : null} />
-      <SearchBar value={query} onChange={setQuery} onSearch={handleSearch} loading={loading} />
-
-      {error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}
+      <TopBar query={query} count={!loading ? articles.length : null} />
+      <SearchBar value={localQuery} onChange={setLocalQuery} onSearch={handleLocalSearch} onHistoryPick={(q) => { setLocalQuery(q); handleSearch(q) }} loading={loading} />
 
       <div className="flex-1 overflow-auto custom-scrollbar">
-        {loading && (
-          <table className="w-full border-collapse" style={{ tableLayout: 'fixed' }}>
-            <tbody><SkeletonRows /></tbody>
-          </table>
+        {loading && <SkeletonCards />}
+        {!loading && articles.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-6">
+            {articles.map(a => (
+              <ArticleCard key={a.pmid} article={a} />
+            ))}
+          </div>
         )}
-        {!loading && articles.length > 0 && <ResultsTable articles={articles} />}
         {!loading && articles.length === 0 && (
-          <table className="w-full border-collapse">
-            <tbody><EmptyState searched={searched} /></tbody>
-          </table>
+          <EmptyState searched={!!query} />
         )}
       </div>
     </div>

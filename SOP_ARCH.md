@@ -3,23 +3,24 @@
 Ez a dokumentum rögzíti a **Novu Research** (AI Research OS) fejlesztési folyamatát, architektúráját és a rendelkezésre álló erőforrások használatát.
 
 ## 1. Projekt Vízió
-Egy professzionális, előfizetéses (SaaS) modellben működő tudományos dashboard, amely a DeepMind Science Skills erejét és a Google Antigravity SDK intelligenciáját kombinálja.
+Egy **professzionális, laboratóriumi szintű kutatói operációs rendszer (Lab-Grade OS)**. A cél nem egy egyszerű SaaS app, hanem egy olyan digitális munkaállomás, amely egy biotechnológiai labor asztalán, az elsődleges munkaeszközként is megállja a helyét.
 
 ## 2. Architektúra (Tech Stack)
 A rendszer három fő rétegből áll:
 
 ### A. Frontend (A Dashboard)
 - **Stack:** React 19, Vite, TypeScript, Tailwind CSS.
-- **UI Architecture:** A `stich/` mappában található HTML vázlatok és a **`DESIGN.md`** rendszerterv alapján.
+- **UI Architecture:** Hierarchikus "Workspace & Toolbox" modell.
+    - **Primary Workspaces (Left Sidebar):** Literature, Genomics, Proteomics, Clinical. Adatintegrációs központok.
+    - **Toolbox / Instrument Gallery:** Egy professzionális "műszertár", ahol minden egyes 37+ skill egyedi "műszerként" (Individual Instrument) érhető el közvetlen bemeneti mezőkkel és futtatási lehetőséggel. Expert-level használatra tervezve.
+    - **Interconnectedness:** Az ágens KÖTELES láncolni a skilleket (pl. Genomics -> ClinVar -> AlphaFold).
+- **UI Architecture Source:** A `stich/` mappában található HTML vázlatok és a **`DESIGN.md`** rendszerterv alapján.
 - **Design System:** **Scientific Minimalism / Cyberpunk-Industrial**. 
     - Színkódok: Background `#09090b`, Surfaces `#18181b`.
     - Tipográfia: `IBM Plex Mono` (adatokhoz) és `Geist` (UI-hoz).
     - Shape: Szigorúan **0px (sharp)** corners.
 - **Workflow:** A projektet a `stich/command_center_desktop.html` struktúrája alapján kell felépíteni (Left Workflow Strip, Central Workspace, Right Tools & AI Monitor).
-- **Fő funkciók:**
-    - Keresőfelület (Literature Search).
-    - 3D Fehérje vizualizáció (NGL Viewer integráció).
-    - Ágens-chat ablak (ahol az Antigravity ágens válaszol).
+- **In-App Documentation:** Minden Workspace (tab) tartalmazzon egy rövid, 1-2 soros leírást és egy "Info" tooltipet a **`WORKSPACE_GUIDE.md`** alapján, amely bemutatja az adatfolyamot (Inputs/Outputs).
 
 ### B. Backend / Intelligence Layer (A Motor)
 - **Stack:** Python (FastAPI).
@@ -65,10 +66,10 @@ A fejlesztés során a Claude-nak KÖTELEZŐ elvégeznie a következő build-aud
 1.  **3D Viewer:** Fehérjeszerkezetek (PDB fájlok) renderelése az appban.
 2.  **Export:** Kutatási jelentések generálása PDF/Markdown formátumban.
 
-## 5. Kereskedelmi és Jogi Irányelvek
+## 6. Kereskedelmi és Jogi Irányelvek
 - Minden kimenő adat az AI által feldolgozott, értékkel növelt tartalom.
 - A platform a "Research-as-a-Service" modellre épül.
 - API kulcsok kezelése: A kliensek vagy a Novusolv központi kulcsát használják (tier-alapon).
 
 ---
-*Utolsó frissítés: 2026-05-26*
+*Utolsó frissítés: 2026-05-27*
