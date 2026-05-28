@@ -269,16 +269,18 @@ export default function App() {
           </div>
         </main>
 
-        <RightPanel
-          page={page}
-          loading={dashLoading}
-          query={dashQuery}
-          articleCount={dashArticles.length}
-          researchContext={researchContext}
-          activeTool={activeTool}
-          onSearch={handleSearch}
-          onNavigate={handleNavigate}
-        />
+        {(page === 'genomic' || page === 'literature') && (
+          <RightPanel
+            page={page}
+            loading={dashLoading}
+            query={dashQuery}
+            articleCount={dashArticles.length}
+            researchContext={researchContext}
+            activeTool={activeTool}
+            onSearch={handleSearch}
+            onNavigate={handleNavigate}
+          />
+        )}
       </div>
 
       {showSystemMonitor && (

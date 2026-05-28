@@ -3,6 +3,8 @@
 import logging
 import httpx
 
+import telemetry
+
 logger = logging.getLogger("novu.uniprot")
 
 _BASE = "https://rest.uniprot.org"
@@ -41,18 +43,19 @@ async def gene_to_uniprot(gene: str, organism: str = "9606") -> str | None:
     if g in _KNOWN:
         return _KNOWN[g]
     try:
-        async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
-            r = await client.get(
-                f"{_BASE}/uniprotkb/search",
-                params={
-                    "query": f"gene_exact:{g} AND organism_id:{organism} AND reviewed:true",
-                    "fields": "accession,gene_primary",
-                    "format": "json",
-                    "size": 1,
-                },
-            )
-            r.raise_for_status()
-            results = r.json().get("results") or []
+        async with telemetry.track_data_api_call():
+            async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
+                r = await client.get(
+                    f"{_BASE}/uniprotkb/search",
+                    params={
+                        "query": f"gene_exact:{g} AND organism_id:{organism} AND reviewed:true",
+                        "fields": "accession,gene_primary",
+                        "format": "json",
+                        "size": 1,
+                    },
+                )
+                r.raise_for_status()
+                results = r.json().get("results") or []
             if results:
                 acc = results[0].get("primaryAccession")
                 logger.info("uniprot_resolved gene=%s -> %s", g, acc)

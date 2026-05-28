@@ -7,6 +7,8 @@ including URLs to the mmCIF structure and PAE confidence files.
 import logging
 import httpx
 
+import telemetry
+
 logger = logging.getLogger("novu.alphafold")
 
 _BASE = "https://alphafold.ebi.ac.uk/api"
@@ -38,10 +40,11 @@ async def fetch_alphafold_metadata(uniprot_id: str) -> dict:
     """
     uid = uniprot_id.strip().upper()
     try:
-        async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
-            r = await client.get(f"{_BASE}/prediction/{uid}")
-            r.raise_for_status()
-            data = r.json()
+        async with telemetry.track_data_api_call():
+            async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
+                r = await client.get(f"{_BASE}/prediction/{uid}")
+                r.raise_for_status()
+                data = r.json()
         if not data:
             return {"error": f"No AlphaFold entry for {uid}"}
 

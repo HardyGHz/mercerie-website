@@ -236,7 +236,7 @@ export default function SystemMonitor({ onClose }: SystemMonitorProps) {
             }`}
           >
             <div>
-              <div className="font-label-caps text-[10px] text-[#8c909f] group-hover:text-[#e1e2ec] transition-colors">PUBMED API</div>
+              <div className="font-label-caps text-[10px] text-[#8c909f] group-hover:text-[#e1e2ec] transition-colors">DATA APIS</div>
               <div className="text-[12px] font-bold mt-1 text-[#e1e2ec]">
                 {stats.pubmed.percent}% <span className="font-normal text-[10px] text-[#8c909f]">| {stats.pubmed.latency_ms}ms</span>
               </div>
@@ -293,14 +293,14 @@ export default function SystemMonitor({ onClose }: SystemMonitorProps) {
               <h2 className="text-[15px] font-bold uppercase tracking-wide flex items-center gap-2">
                 {activeTab === 'brain' && 'BRAIN // GEMINI AGENT LOAD'}
                 {activeTab === 'bus' && 'DATA BUS // EXTRACTOR WORKFLOW'}
-                {activeTab === 'pubmed' && 'PUBMED // API REQUEST LATENCY'}
+                {activeTab === 'pubmed' && 'DATA APIs // EXTERNAL REQUEST LATENCY'}
                 {activeTab === 'db' && 'DB SYNC // SUPABASE LINK'}
                 {activeTab === 'cache' && 'CACHE // HIT RATE'}
               </h2>
               <p className="text-[10px] text-[#8c909f] font-label-caps mt-0.5">
                 {activeTab === 'brain' && 'Agent token parsing capacity over 60 seconds'}
                 {activeTab === 'bus' && 'NLP entity extraction event processing speed'}
-                {activeTab === 'pubmed' && 'PubMed E-Utilities REST endpoint latency'}
+                {activeTab === 'pubmed' && 'PubMed / UniProt / ClinVar / gnomAD / AlphaFold / PDB / CT.gov latency'}
                 {activeTab === 'db' && 'Supabase transaction logging queue operations'}
                 {activeTab === 'cache' && 'Cache effectiveness over recent lookups (hit rate %)'}
               </p>
@@ -426,8 +426,8 @@ export default function SystemMonitor({ onClose }: SystemMonitorProps) {
             {activeTab === 'pubmed' && (
               <>
                 <div className="flex justify-between py-0.5 border-b border-[#424754]/10">
-                  <span className="text-[#8c909f] font-label-caps">API ENDPOINT:</span>
-                  <span className="font-bold text-on-surface">E-Utilities</span>
+                  <span className="text-[#8c909f] font-label-caps">SOURCES:</span>
+                  <span className="font-bold text-on-surface">7 endpoints</span>
                 </div>
                 <div className="flex justify-between py-0.5 border-b border-[#424754]/10">
                   <span className="text-[#8c909f] font-label-caps">RESPONSE LATENCY:</span>

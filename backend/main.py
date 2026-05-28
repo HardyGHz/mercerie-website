@@ -6,6 +6,7 @@ from contextlib import asynccontextmanager
 from typing import Any
 
 import dotenv
+import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -114,6 +115,88 @@ class ProteinResponse(BaseModel):
     variant: str | None = None
     residue_position: int | None = None
     error: str | None = None
+
+class ClinicalSearchRequest(BaseModel):
+    condition: str | None = Field(default=None, max_length=200)
+    intervention: str | None = Field(default=None, max_length=200)
+    gene: str | None = Field(default=None, max_length=64)
+    status: str | None = Field(default=None, max_length=64)
+    phase: str | None = Field(default=None, max_length=32)
+    limit: int = Field(default=20, ge=1, le=100)
+
+
+class InterventionShort(BaseModel):
+    type: str | None = None
+    name: str | None = None
+
+
+class ClinicalTrialSummary(BaseModel):
+    nct_id: str | None
+    brief_title: str | None
+    overall_status: str | None
+    phases: list[str] = []
+    study_type: str | None = None
+    conditions: list[str] = []
+    interventions: list[InterventionShort] = []
+    lead_sponsor: str | None = None
+    enrollment_count: int | None = None
+    start_date: str | None = None
+    primary_completion_date: str | None = None
+    countries: list[str] = []
+    site_count: int = 0
+
+
+class ClinicalSearchResponse(BaseModel):
+    total_count: int | None = None
+    studies: list[ClinicalTrialSummary] = []
+    next_page_token: str | None = None
+
+
+class InterventionFull(BaseModel):
+    type: str | None = None
+    name: str | None = None
+    description: str | None = None
+
+
+class TrialSite(BaseModel):
+    facility: str | None = None
+    city: str | None = None
+    state: str | None = None
+    country: str | None = None
+    status: str | None = None
+
+
+class TrialOutcome(BaseModel):
+    measure: str | None = None
+    time_frame: str | None = None
+
+
+class ClinicalTrialDetail(BaseModel):
+    nct_id: str | None
+    brief_title: str | None
+    official_title: str | None = None
+    overall_status: str | None
+    phases: list[str] = []
+    study_type: str | None = None
+    brief_summary: str | None = None
+    detailed_description: str | None = None
+    conditions: list[str] = []
+    interventions: list[InterventionFull] = []
+    lead_sponsor: str | None = None
+    enrollment_count: int | None = None
+    start_date: str | None = None
+    primary_completion_date: str | None = None
+    completion_date: str | None = None
+    eligibility_criteria: str | None = None
+    minimum_age: str | None = None
+    maximum_age: str | None = None
+    sex: str | None = None
+    std_ages: list[str] = []
+    healthy_volunteers: bool | None = None
+    sites: list[TrialSite] = []
+    primary_outcomes: list[TrialOutcome] = []
+    secondary_outcomes: list[TrialOutcome] = []
+
 
 class ResearchContext(BaseModel):
     gene: str | None
@@ -225,6 +308,54 @@ async def protein(req: ProteinRequest) -> Any:
         import db
         await db.log_error("backend", type(e).__name__, str(e), {"gene": req.gene, "variant": req.variant})
         raise HTTPException(status_code=500, detail=f"Protein lookup failed: {e}")
+
+
+@app.post("/api/clinical/search", response_model=ClinicalSearchResponse)
+async def clinical_search(req: ClinicalSearchRequest) -> Any:
+    """Search ClinicalTrials.gov v2 with filter combinators."""
+    import requests as _req
+    from tools.clinical_trials import search_studies, slim_study_summary
+    try:
+        raw = await search_studies(
+            condition=req.condition,
+            intervention=req.intervention,
+            gene=req.gene,
+            status=req.status,
+            phase=req.phase,
+            limit=req.limit,
+        )
+    except _req.HTTPError as e:
+        sc = e.response.status_code if e.response is not None else 502
+        raise HTTPException(status_code=502, detail=f"ClinicalTrials.gov returned {sc}")
+    except Exception as e:
+        import db
+        await db.log_error("backend", type(e).__name__, str(e), {"req": req.model_dump()})
+        raise HTTPException(status_code=500, detail=f"Clinical search failed: {e}")
+    studies = [slim_study_summary(s) for s in raw.get("studies", [])]
+    return {
+        "total_count": raw.get("totalCount"),
+        "studies": studies,
+        "next_page_token": raw.get("nextPageToken"),
+    }
+
+
+@app.get("/api/clinical/trial/{nct_id}", response_model=ClinicalTrialDetail)
+async def clinical_trial(nct_id: str) -> Any:
+    """Fetch a single ClinicalTrials.gov trial by NCT ID."""
+    import requests as _req
+    from tools.clinical_trials import get_study, slim_study_detail
+    try:
+        raw = await get_study(nct_id)
+    except _req.HTTPError as e:
+        sc = e.response.status_code if e.response is not None else 502
+        if sc == 404:
+            raise HTTPException(status_code=404, detail=f"Trial {nct_id} not found")
+        raise HTTPException(status_code=502, detail=f"ClinicalTrials.gov returned {sc}")
+    except Exception as e:
+        import db
+        await db.log_error("backend", type(e).__name__, str(e), {"nct_id": nct_id})
+        raise HTTPException(status_code=500, detail=f"Trial fetch failed: {e}")
+    return slim_study_detail(raw)
 
 
 @app.post("/api/search/direct", response_model=SearchResponse)

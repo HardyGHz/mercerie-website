@@ -42,16 +42,11 @@ async def search_pubmed(query: str, max_results: int = 10) -> list[str]:
         "sort": "relevance",
         "retmode": "json",
     }
-    started = time.monotonic()
-    try:
+    async with telemetry.track_data_api_call():
         async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
             r = await client.get(f"{EUTILS_BASE}/entrez/eutils/esearch.fcgi", params=params)
             r.raise_for_status()
             data = r.json()
-        telemetry.record_pubmed_call(time.monotonic() - started, error=False)
-    except Exception:
-        telemetry.record_pubmed_call(time.monotonic() - started, error=True)
-        raise
     return data["esearchresult"]["idlist"]
 
 
@@ -66,16 +61,11 @@ async def fetch_article_abstracts(pmids: list[str]) -> list[dict[str, Any]]:
         "rettype": "abstract",
         "retmode": "xml",
     }
-    started = time.monotonic()
-    try:
+    async with telemetry.track_data_api_call():
         async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
             r = await client.get(f"{EUTILS_BASE}/entrez/eutils/efetch.fcgi", params=params)
             r.raise_for_status()
             xml_text = r.text
-        telemetry.record_pubmed_call(time.monotonic() - started, error=False)
-    except Exception:
-        telemetry.record_pubmed_call(time.monotonic() - started, error=True)
-        raise
 
     root = ET.fromstring(xml_text)
     results = []

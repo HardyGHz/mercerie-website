@@ -56,13 +56,26 @@ export default function ProteinViewer({ onNavigate, target }: Props) {
       cameraType: 'perspective',
     })
     stageRef.current = stage
+
+    // Immediate resize to ensure it doesn't start at 0x0
+    stage.handleResize()
+
     // Resize on container changes (grid layout settling), not just window resize.
-    // Without this NGL renders against a 0x0 canvas → black screen even after structure loads.
-    const ro = new ResizeObserver(() => stage.handleResize())
+    const ro = new ResizeObserver(() => {
+      stage.handleResize()
+      // If we already have a component, keep it framed
+      if (componentRef.current) componentRef.current.autoView()
+    })
     ro.observe(container)
+
     const handleWinResize = () => stage.handleResize()
     window.addEventListener('resize', handleWinResize)
+
+    // Periodic check for the first 2 seconds to catch any delayed layout settling
+    const timer = setInterval(() => stage.handleResize(), 500)
+
     return () => {
+      clearInterval(timer)
       ro.disconnect()
       window.removeEventListener('resize', handleWinResize)
       stage.dispose()
@@ -135,29 +148,35 @@ export default function ProteinViewer({ onNavigate, target }: Props) {
           return
         }
         if (myId !== loadIdRef.current) {
-          // A newer load was kicked off (StrictMode rerun, prop re-fire, etc.).
-          // Discard this stale component so it doesn't pile up on the stage.
           stage.removeComponent(comp)
           return
         }
-        // I am the latest. Evict any prior components (from earlier stale loads
-        // that already settled), then take over as the canonical component.
+        
+        // Evict prior components
         stage.compList.slice().forEach((c: any) => { if (c !== comp) stage.removeComponent(c) })
+        
         loadedComp = comp
         componentRef.current = comp
-        comp.addRepresentation(representation, { color: 'chainindex' })
-        // Ensure the canvas dimensions match the (possibly just-resized) container
-        // before framing the camera, otherwise autoView fits to a stale viewport.
+        comp.addRepresentation(representation, { color: 'bfactor' })
+        
+        // Initial frame
         stage.handleResize()
         comp.autoView()
-        // Async loadFile can resolve while the grid is still settling (especially on
-        // route transitions from Genomics). Re-frame on the next paint to catch any
-        // layout shift that happened mid-load.
-        requestAnimationFrame(() => {
+        
+        // Second frame after layout settling
+        setTimeout(() => {
           if (myId !== loadIdRef.current || cancelled) return
           stage.handleResize()
           comp.autoView()
-        })
+          
+          // Third frame for safety (some grid systems take a moment)
+          requestAnimationFrame(() => {
+            if (myId !== loadIdRef.current || cancelled) return
+            stage.handleResize()
+            comp.autoView()
+          })
+        }, 150)
+
         // Highlight mutation residue if present
         if (data?.residue_position) {
           comp.addRepresentation('ball+stick', {
@@ -201,7 +220,7 @@ export default function ProteinViewer({ onNavigate, target }: Props) {
     if (!comp) return
     // Remove all representations of the same type and re-add
     comp.removeAllRepresentations()
-    comp.addRepresentation(representation, { color: 'chainindex' })
+    comp.addRepresentation(representation, { color: 'bfactor' })
     if (data?.residue_position) {
       comp.addRepresentation('ball+stick', {
         sele: `${data.residue_position} and protein`,
@@ -321,10 +340,10 @@ export default function ProteinViewer({ onNavigate, target }: Props) {
       </section>
 
       {/* ── Main grid: viewer + sidebar ── */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_320px] overflow-hidden">
+      <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[1fr_320px] grid-rows-[1fr_auto] lg:grid-rows-1 overflow-hidden">
 
         {/* ── 3D Viewer ── */}
-        <div className="relative bg-[#09090b] border-r border-[#27272a] overflow-hidden">
+        <div className="relative bg-[#09090b] border-r border-[#27272a] overflow-hidden min-h-[400px]">
           {/* NGL canvas mount */}
           <div ref={containerRef} className="absolute inset-0" />
 

@@ -100,6 +100,86 @@ export interface ProteinTarget {
   variant: string | null
 }
 
+export interface InterventionShort {
+  type: string | null
+  name: string | null
+}
+
+export interface InterventionFull extends InterventionShort {
+  description: string | null
+}
+
+export interface TrialSite {
+  facility: string | null
+  city: string | null
+  state: string | null
+  country: string | null
+  status: string | null
+}
+
+export interface TrialOutcome {
+  measure: string | null
+  time_frame: string | null
+}
+
+export interface ClinicalTrialSummary {
+  nct_id: string | null
+  brief_title: string | null
+  overall_status: string | null
+  phases: string[]
+  study_type: string | null
+  conditions: string[]
+  interventions: InterventionShort[]
+  lead_sponsor: string | null
+  enrollment_count: number | null
+  start_date: string | null
+  primary_completion_date: string | null
+  countries: string[]
+  site_count: number
+}
+
+export interface ClinicalSearchResponse {
+  total_count: number | null
+  studies: ClinicalTrialSummary[]
+  next_page_token: string | null
+}
+
+export interface ClinicalTrialDetail {
+  nct_id: string | null
+  brief_title: string | null
+  official_title: string | null
+  overall_status: string | null
+  phases: string[]
+  study_type: string | null
+  brief_summary: string | null
+  detailed_description: string | null
+  conditions: string[]
+  interventions: InterventionFull[]
+  lead_sponsor: string | null
+  enrollment_count: number | null
+  start_date: string | null
+  primary_completion_date: string | null
+  completion_date: string | null
+  eligibility_criteria: string | null
+  minimum_age: string | null
+  maximum_age: string | null
+  sex: string | null
+  std_ages: string[]
+  healthy_volunteers: boolean | null
+  sites: TrialSite[]
+  primary_outcomes: TrialOutcome[]
+  secondary_outcomes: TrialOutcome[]
+}
+
+export interface ClinicalSearchParams {
+  condition?: string | null
+  intervention?: string | null
+  gene?: string | null
+  status?: string | null
+  phase?: string | null
+  limit?: number
+}
+
 export interface SubsystemStats {
   percent: number
   [key: string]: any

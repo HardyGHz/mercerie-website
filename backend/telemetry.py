@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import time
 from collections import deque
+from contextlib import asynccontextmanager, contextmanager
 from threading import Lock
 from typing import Any
 
@@ -97,7 +98,8 @@ def brain_session_end() -> None:
         _brain["active_sessions"] = max(0, _brain["active_sessions"] - 1)
 
 
-def record_pubmed_call(latency_s: float, error: bool = False) -> None:
+def record_data_api_call(latency_s: float, error: bool = False) -> None:
+    """Record any external data-API call (PubMed/UniProt/ClinVar/gnomAD/AlphaFold/PDB/CT.gov)."""
     now = time.time()
     with _lock:
         _pubmed["_total"] += 1
@@ -119,8 +121,38 @@ def record_pubmed_call(latency_s: float, error: bool = False) -> None:
             _pubmed["requests_per_hour"] = int(len(recent) * 3600 / span)
         elif _pubmed["_total"] > 0:
             _pubmed["requests_per_hour"] = max(_pubmed["requests_per_hour"], 1)
-        # percent: latency-based, NCBI is typically 500-2000ms — 3s == 100%
+        # percent: latency-based — typical external APIs 200-2000ms; 3s == 100%
         _pubmed["percent"] = round(min(100.0, _pubmed["latency_ms"] / 30.0), 1)
+
+
+# Backwards-compat alias — older code paths still call record_pubmed_call.
+record_pubmed_call = record_data_api_call
+
+
+@asynccontextmanager
+async def track_data_api_call():
+    """Async context that records a Data-APIs call (success+latency, or error)."""
+    started = time.monotonic()
+    try:
+        yield
+    except Exception:
+        record_data_api_call(time.monotonic() - started, error=True)
+        raise
+    else:
+        record_data_api_call(time.monotonic() - started, error=False)
+
+
+@contextmanager
+def track_data_api_call_sync():
+    """Sync flavor of track_data_api_call (for requests-based tools)."""
+    started = time.monotonic()
+    try:
+        yield
+    except Exception:
+        record_data_api_call(time.monotonic() - started, error=True)
+        raise
+    else:
+        record_data_api_call(time.monotonic() - started, error=False)
 
 
 def record_db_call(latency_s: float) -> None:

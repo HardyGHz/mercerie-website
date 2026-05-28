@@ -6,6 +6,8 @@ from typing import Literal
 
 import httpx
 
+import telemetry
+
 logger = logging.getLogger("novu.clinvar")
 
 _BASE = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
@@ -57,24 +59,26 @@ async def lookup_variant(gene: str | None, variant: str) -> dict:
     default: dict = {"status": "VUS", "cls": _CLS["VUS"], "rsid": None, "clinvar_id": None}
     try:
         term = f"{gene}[gene] AND {variant}[varname]" if gene else f"{variant}[varname]"
-        async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
-            r = await client.get(
-                f"{_BASE}/esearch.fcgi",
-                params=_base_params() | {"db": "clinvar", "term": term, "retmax": 1},
-            )
-            r.raise_for_status()
-            ids = r.json().get("esearchresult", {}).get("idlist", [])
+        async with telemetry.track_data_api_call():
+            async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
+                r = await client.get(
+                    f"{_BASE}/esearch.fcgi",
+                    params=_base_params() | {"db": "clinvar", "term": term, "retmax": 1},
+                )
+                r.raise_for_status()
+                ids = r.json().get("esearchresult", {}).get("idlist", [])
 
         if not ids:
             return default
 
-        async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
-            r = await client.get(
-                f"{_BASE}/esummary.fcgi",
-                params=_base_params() | {"db": "clinvar", "id": ids[0]},
-            )
-            r.raise_for_status()
-            data = r.json()
+        async with telemetry.track_data_api_call():
+            async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
+                r = await client.get(
+                    f"{_BASE}/esummary.fcgi",
+                    params=_base_params() | {"db": "clinvar", "id": ids[0]},
+                )
+                r.raise_for_status()
+                data = r.json()
 
         uids = data.get("result", {}).get("uids", [])
         if not uids:

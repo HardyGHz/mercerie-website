@@ -3,6 +3,8 @@
 import logging
 import httpx
 
+import telemetry
+
 logger = logging.getLogger("novu.pdb")
 
 _SEARCH_URL = "https://search.rcsb.org/rcsbsearch/v2/query"
@@ -31,10 +33,11 @@ async def search_pdb_by_gene(gene: str, max_results: int = 10) -> list[str]:
         "return_type": "entry",
     }
     try:
-        async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
-            r = await client.post(_SEARCH_URL, json=query)
-            r.raise_for_status()
-            data = r.json()
+        async with telemetry.track_data_api_call():
+            async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
+                r = await client.post(_SEARCH_URL, json=query)
+                r.raise_for_status()
+                data = r.json()
         ids = [hit.get("identifier") for hit in (data.get("result_set") or [])]
         return [i for i in ids if i]
     except Exception as e:
@@ -61,10 +64,11 @@ async def fetch_pdb_metadata(pdb_id: str) -> dict:
     }
     """
     try:
-        async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
-            r = await client.post(_DATA_URL, json={"query": query, "variables": {"id": pid}})
-            r.raise_for_status()
-            data = r.json()
+        async with telemetry.track_data_api_call():
+            async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
+                r = await client.post(_DATA_URL, json={"query": query, "variables": {"id": pid}})
+                r.raise_for_status()
+                data = r.json()
         entry = (data.get("data") or {}).get("entry")
         if not entry:
             return {"error": f"PDB entry {pid} not found"}

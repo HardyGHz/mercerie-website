@@ -1,4 +1,4 @@
-import type { SearchResponse, Variant, GenomicsResponse, ProteinResponse, SystemStatsResponse } from '@/types'
+import type { SearchResponse, Variant, GenomicsResponse, ProteinResponse, SystemStatsResponse, ClinicalSearchResponse, ClinicalSearchParams, ClinicalTrialDetail } from '@/types'
 import { logError } from '@/lib/supabase'
 
 const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
@@ -71,6 +71,30 @@ export async function searchLiterature(query: string, maxResults = 10): Promise<
     }
     throw err
   }
+}
+
+export async function searchClinicalTrials(params: ClinicalSearchParams): Promise<ClinicalSearchResponse> {
+  const res = await fetch(`${API_BASE}/api/clinical/search`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  })
+  if (!res.ok) {
+    const msg = `Clinical search error: ${res.status}`
+    logError('clinical_search_error', msg, params as Record<string, unknown>)
+    throw new Error(msg)
+  }
+  return res.json()
+}
+
+export async function getClinicalTrial(nctId: string): Promise<ClinicalTrialDetail> {
+  const res = await fetch(`${API_BASE}/api/clinical/trial/${encodeURIComponent(nctId)}`)
+  if (!res.ok) {
+    const msg = `Trial detail error: ${res.status}`
+    logError('clinical_trial_error', msg, { nctId })
+    throw new Error(msg)
+  }
+  return res.json()
 }
 
 export async function getSystemStats(): Promise<SystemStatsResponse> {

@@ -3,6 +3,8 @@
 import logging
 import httpx
 
+import telemetry
+
 logger = logging.getLogger("novu.gnomad")
 
 _GRAPHQL_URL = "https://gnomad.broadinstitute.org/api"
@@ -11,10 +13,11 @@ _DATASET = "gnomad_r4"
 
 
 async def _gnomad_post(query: str, variables: dict) -> dict:
-    async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
-        r = await client.post(_GRAPHQL_URL, json={"query": query, "variables": variables})
-        r.raise_for_status()
-        return r.json()
+    async with telemetry.track_data_api_call():
+        async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
+            r = await client.post(_GRAPHQL_URL, json={"query": query, "variables": variables})
+            r.raise_for_status()
+            return r.json()
 
 
 async def _resolve_query(query_str: str) -> str | None:
