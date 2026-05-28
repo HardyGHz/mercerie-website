@@ -36,6 +36,8 @@ export default function ProteinViewer({ onNavigate, target }: Props) {
   // bbox, camera lands at infinity → black canvas. Only the latest load wins.
   const loadIdRef = useRef(0)
 
+  const lastLookupRef = useRef<{ gene: string; variant: string | null } | null>(null)
+
   const [geneInput, setGeneInput] = useState(target?.gene ?? 'TP53')
   const [variantInput, setVariantInput] = useState(target?.variant ?? '')
   const [data, setData] = useState<ProteinResponse | null>(null)
@@ -72,6 +74,10 @@ export default function ProteinViewer({ onNavigate, target }: Props) {
   // ── Trigger lookup when target prop changes ──
   useEffect(() => {
     if (target?.gene) {
+      const last = lastLookupRef.current
+      if (last && last.gene === target.gene && last.variant === (target.variant ?? null)) {
+        return
+      }
       setGeneInput(target.gene)
       setVariantInput(target.variant ?? '')
       handleLookup(target.gene, target.variant ?? null)
@@ -85,6 +91,7 @@ export default function ProteinViewer({ onNavigate, target }: Props) {
       setError('Gene symbol required')
       return
     }
+    lastLookupRef.current = { gene: g, variant }
     setLoading(true)
     setError(null)
     setData(null)
@@ -118,9 +125,15 @@ export default function ProteinViewer({ onNavigate, target }: Props) {
     const stage = stageRef.current
     if (!stage || !source) return
     const myId = ++loadIdRef.current
+    let cancelled = false
+    let loadedComp: any = null
+
     stage.loadFile(source.url, { ext: 'cif' })
       .then((comp: any) => {
-        if (!comp) return
+        if (cancelled || !comp) {
+          if (comp) stage.removeComponent(comp)
+          return
+        }
         if (myId !== loadIdRef.current) {
           // A newer load was kicked off (StrictMode rerun, prop re-fire, etc.).
           // Discard this stale component so it doesn't pile up on the stage.
@@ -130,6 +143,7 @@ export default function ProteinViewer({ onNavigate, target }: Props) {
         // I am the latest. Evict any prior components (from earlier stale loads
         // that already settled), then take over as the canonical component.
         stage.compList.slice().forEach((c: any) => { if (c !== comp) stage.removeComponent(c) })
+        loadedComp = comp
         componentRef.current = comp
         comp.addRepresentation(representation, { color: 'chainindex' })
         // Ensure the canvas dimensions match the (possibly just-resized) container
@@ -140,7 +154,7 @@ export default function ProteinViewer({ onNavigate, target }: Props) {
         // route transitions from Genomics). Re-frame on the next paint to catch any
         // layout shift that happened mid-load.
         requestAnimationFrame(() => {
-          if (myId !== loadIdRef.current) return
+          if (myId !== loadIdRef.current || cancelled) return
           stage.handleResize()
           comp.autoView()
         })
@@ -166,8 +180,18 @@ export default function ProteinViewer({ onNavigate, target }: Props) {
         }
       })
       .catch(err => {
-        if (myId === loadIdRef.current) setError(`Failed to load structure: ${err.message ?? err}`)
+        if (myId === loadIdRef.current && !cancelled) setError(`Failed to load structure: ${err.message ?? err}`)
       })
+
+    return () => {
+      cancelled = true
+      if (loadedComp && stageRef.current) {
+        stageRef.current.removeComponent(loadedComp)
+        if (componentRef.current === loadedComp) {
+          componentRef.current = null
+        }
+      }
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [source, data?.residue_position])
 

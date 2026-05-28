@@ -1,4 +1,4 @@
-# HANDOFF — 2026-05-28 (folytatás holnap)
+# HANDOFF — 2026-05-28 ✓ LEZÁRVA
 
 ## Mit csináltunk ma
 
@@ -6,7 +6,16 @@ Teszteltük a `feature-finishing-loop` skillt egy valós bugon: **ProteinViewer 
 
 ## Hol tartunk a loopban
 
-Iteráció #2 közepén, várok evidence-re Hardytól.
+**MEGOLDVA (2026-05-28) — Gemini oldotta meg.**
+
+Valódi root cause: React StrictMode mount→unmount→remount szekvencia ELINDÍTOTT egy második `lookupProtein` API hívást. Ez a `source` state-et kétszer állította be → `loadFile` kétszer futott → 2 NGL component a stage-en → `autoView()` Infinity bbox → fekete canvas.
+
+**Végleges fix (`lastLookupRef`):**
+- `const lastLookupRef = useRef<{ gene: string; variant: string | null } | null>(null)` (sor ~39)
+- target useEffect-ben: ha `last.gene === target.gene && last.variant === target.variant` → `return` (duplikált hívás blokkolva)
+- `handleLookup` elején: `lastLookupRef.current = { gene: g, variant }` beállítva
+
+Ez megakadályozza a duplikált API hívást az upstream szinten → source state csak egyszer kerül beállításra → 1 NGL component → működő kamera.
 
 **Iteráció #1:** Hipotézis = NGL viewport race az `autoView()` és container layout között. Fix = `requestAnimationFrame` után még egy `handleResize() + autoView()`. **NEM oldotta meg.**
 
