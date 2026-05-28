@@ -11,6 +11,10 @@ const PRIMARY_WORKSPACES: { id: Page; icon: string; label: string; tag: string; 
     desc: 'Direct PubMed search across 36M+ biomedical articles with abstract viewer and DOI links',
   },
   {
+    id: 'genomics-explorer', icon: 'genetics', label: 'Genomics Explorer', tag: 'DNA', color: '#4edea3',
+    desc: 'Live ClinVar + gnomAD variant browser — pathogenicity, population allele frequencies, hotspot tables',
+  },
+  {
     id: 'protein', icon: 'science', label: 'Protein Viewer', tag: 'PDB', color: '#c0c1ff',
     desc: 'AlphaFold & PDB structure viewer — 3D ribbon model, binding site analysis, domain annotation',
   },
@@ -105,21 +109,6 @@ export default function Sidebar({ activePage, activeTool, onNavigate, onToolSele
         })}
       </div>
 
-      {/* ── SETTINGS (pinned bottom) ── */}
-      <div className="mt-auto w-full flex flex-col items-center py-2 border-t border-[#424754]">
-        <button
-          title="System Config"
-          onClick={() => onNavigate('system')}
-          className={[
-            'w-10 h-10 flex items-center justify-center transition-all border-l-2',
-            activePage === 'system' && activeTool === null
-              ? 'border-[#8c909f] bg-[#272a31] text-[#8c909f]'
-              : 'border-transparent text-[#424754] hover:text-[#8c909f] hover:bg-[#1d2027]',
-          ].join(' ')}
-        >
-          <span className="material-symbols-outlined text-[18px]">settings</span>
-        </button>
-      </div>
     </aside>
   )
 }

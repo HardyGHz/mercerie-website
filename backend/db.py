@@ -4,8 +4,11 @@ import asyncio
 import hashlib
 import logging
 import os
+import time
 from datetime import datetime, timedelta, timezone
 from typing import Any
+
+import telemetry
 
 logger = logging.getLogger("novu.db")
 
@@ -34,6 +37,7 @@ def _get_cache_sync(query: str) -> list[dict] | None:
     client = _get_client()
     if client is None:
         return None
+    started = time.monotonic()
     try:
         h = _query_hash(query)
         now = datetime.now(timezone.utc).isoformat()
@@ -45,10 +49,14 @@ def _get_cache_sync(query: str) -> list[dict] | None:
             .limit(1)
             .execute()
         )
+        telemetry.record_db_call(time.monotonic() - started)
         if result.data:
             logger.info("cache_hit query=%s", query[:60])
+            telemetry.record_cache_hit()
             return result.data[0]["results_json"]
+        telemetry.record_cache_miss()
     except Exception as e:
+        telemetry.record_db_call(time.monotonic() - started)
         logger.warning("cache_get_failed err=%s", e)
     return None
 
@@ -57,6 +65,7 @@ def _set_cache_sync(query: str, results: list[dict]) -> None:
     client = _get_client()
     if client is None:
         return
+    started = time.monotonic()
     try:
         h = _query_hash(query)
         expires_at = (datetime.now(timezone.utc) + timedelta(hours=24)).isoformat()
@@ -66,9 +75,36 @@ def _set_cache_sync(query: str, results: list[dict]) -> None:
             "results_json": results,
             "expires_at": expires_at,
         }).execute()
+        telemetry.record_db_call(time.monotonic() - started)
         logger.info("cache_set query=%s count=%d", query[:60], len(results))
+        _refresh_cache_count_sync()
     except Exception as e:
+        telemetry.record_db_call(time.monotonic() - started)
         logger.warning("cache_set_failed err=%s", e)
+
+
+def _refresh_cache_count_sync() -> None:
+    """Recompute total cached query count for the dashboard."""
+    client = _get_client()
+    if client is None:
+        return
+    try:
+        res = (
+            client.table("pubmed_cache")
+            .select("query_hash", count="exact", head=True)
+            .execute()
+        )
+        total = getattr(res, "count", None)
+        if total is None and getattr(res, "data", None) is not None:
+            total = len(res.data)
+        if total is not None:
+            telemetry.set_cached_queries_count(int(total))
+    except Exception as e:
+        logger.warning("cache_count_refresh_failed err=%s", e)
+
+
+async def refresh_cache_count() -> None:
+    await asyncio.to_thread(_refresh_cache_count_sync)
 
 
 async def get_cache(query: str) -> list[dict] | None:

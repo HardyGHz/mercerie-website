@@ -38,12 +38,23 @@ def _map_significance(sig: str) -> PathogenicityStatus:
     return "VUS"
 
 
+def _extract_rsid(record: dict) -> str | None:
+    """Extract dbSNP rsID from a ClinVar esummary record."""
+    for vs in record.get("variation_set") or []:
+        for xref in vs.get("variation_xrefs") or []:
+            if (xref.get("db_source") or "").lower() == "dbsnp":
+                db_id = xref.get("db_id")
+                if db_id:
+                    return f"rs{db_id}" if not str(db_id).startswith("rs") else str(db_id)
+    return None
+
+
 async def lookup_variant(gene: str | None, variant: str) -> dict:
     """
-    Look up a variant in ClinVar. Returns {status, cls}.
+    Look up a variant in ClinVar. Returns {status, cls, rsid, clinvar_id}.
     Falls back to VUS on any network or parse error.
     """
-    default: dict = {"status": "VUS", "cls": _CLS["VUS"]}
+    default: dict = {"status": "VUS", "cls": _CLS["VUS"], "rsid": None, "clinvar_id": None}
     try:
         term = f"{gene}[gene] AND {variant}[varname]" if gene else f"{variant}[varname]"
         async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
@@ -77,8 +88,9 @@ async def lookup_variant(gene: str | None, variant: str) -> dict:
             or ""
         )
         status = _map_significance(sig)
-        logger.info("clinvar_hit variant=%s sig=%r -> %s", variant, sig, status)
-        return {"status": status, "cls": _CLS[status]}
+        rsid = _extract_rsid(record)
+        logger.info("clinvar_hit variant=%s sig=%r -> %s rsid=%s", variant, sig, status, rsid)
+        return {"status": status, "cls": _CLS[status], "rsid": rsid, "clinvar_id": uids[0]}
 
     except Exception as e:
         logger.warning("clinvar_failed variant=%s err=%s", variant, e)

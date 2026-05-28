@@ -1,17 +1,28 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import Sidebar from '@/components/Sidebar'
+import SystemMonitor from '@/components/SystemMonitor'
 import RightPanel from '@/components/RightPanel'
 import Dashboard from '@/pages/Dashboard'
 import LiteratureSearch from '@/pages/LiteratureSearch'
 import GenomicsExplorer from '@/pages/GenomicsExplorer'
 import ClinicalTrials from '@/pages/ClinicalTrials'
-import SystemConfig from '@/pages/SystemConfig'
-import ProteinViewer from '@/pages/ProteinViewer'
 import InstrumentPanel from '@/pages/InstrumentPanel'
+
+// Heavy 3D viewer — lazy-loaded only when user navigates to /protein
+const ProteinViewer = lazy(() => import('@/pages/ProteinViewer'))
+
+function ProteinViewerFallback() {
+  return (
+    <div className="h-full flex flex-col items-center justify-center gap-3 bg-[#09090b]">
+      <div className="w-8 h-8 border-2 border-[#c0c1ff] border-t-transparent rounded-full animate-spin" />
+      <div className="font-label-caps text-[10px] text-[#c0c1ff] tracking-widest animate-pulse">LOADING 3D VIEWER</div>
+    </div>
+  )
+}
 import { searchLiterature, enrichVariants } from '@/lib/api'
 import { logSearch } from '@/lib/supabase'
 import { getInstrument, CATEGORY_META } from '@/lib/instruments'
-import type { Article, Page, ResearchContext } from '@/types'
+import type { Article, Page, ResearchContext, ProteinTarget } from '@/types'
 
 const HISTORY_KEY = 'novu_search_history'
 const MAX_HISTORY = 8
@@ -35,7 +46,6 @@ const PAGE_META: Record<Page, { sec: string; source: string; color: string }> = 
   'protein':           { sec: 'PROTEOMICS',     source: 'PDB // AlphaFold',   color: '#c0c1ff' },
   'genomics-explorer': { sec: 'GENOMICS',       source: 'ClinVar // gnomAD',  color: '#4edea3' },
   'clinical':          { sec: 'CLINICAL_PHASE', source: 'ClinicalTrials.gov', color: '#f59e0b' },
-  'system':            { sec: 'SYSTEM_CONFIG',  source: 'Local',              color: '#8c909f' },
   'instrument':        { sec: 'TOOLBOX',        source: 'Science Skills',     color: '#adc6ff' },
 }
 
@@ -47,8 +57,10 @@ export default function App() {
   const [dashArticles, setDashArticles]     = useState<Article[]>([])
   const [researchContext, setResearchContext] = useState<ResearchContext>({ gene: null, variants: [], proteinName: null })
   const [dashLoading, setDashLoading]       = useState(false)
+  const [proteinTarget, setProteinTarget]   = useState<ProteinTarget | null>(null)
   const [showHistory, setShowHistory]       = useState(false)
   const [history, setHistory]               = useState<string[]>([])
+  const [showSystemMonitor, setShowSystemMonitor] = useState(false)
   const searchRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -102,6 +114,12 @@ export default function App() {
     if (p !== 'instrument') setActiveTool(null)
   }
 
+  function handleSendToProtein(gene: string, variant: string | null) {
+    setProteinTarget({ gene, variant })
+    setPage('protein')
+    setActiveTool(null)
+  }
+
   useEffect(() => {
     handleSearch('TP53 p53 tumor suppressor apoptosis')
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
@@ -112,16 +130,8 @@ export default function App() {
   const instCat = activeInstrument ? CATEGORY_META[activeInstrument.category] : null
   const contextColor = activeInstrument ? instCat!.color : pageMeta.color
 
-  if (page === 'genomics-explorer') {
-    return (
-      <div className="fixed inset-0 z-50 bg-[#09090b]">
-        <GenomicsExplorer onNavigate={handleNavigate} />
-      </div>
-    )
-  }
-
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-[#09090b]">
+    <div className="h-screen flex flex-col overflow-hidden bg-[#09090b] relative">
 
       {/* ── HEADER ── */}
       <header className="h-14 bg-[#0b0e15] border-b border-[#424754] flex items-center justify-between px-6 z-50 shrink-0">
@@ -172,7 +182,12 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-4">
-          <span className="material-symbols-outlined text-[#8c909f] hover:text-[#4edea3] transition-colors cursor-pointer text-[20px]">memory</span>
+          <span 
+            className={`material-symbols-outlined transition-colors cursor-pointer text-[20px] ${showSystemMonitor ? 'text-[#4edea3]' : 'text-[#8c909f] hover:text-[#4edea3]'}`}
+            onClick={() => setShowSystemMonitor(prev => !prev)}
+          >
+            memory
+          </span>
           <span className="material-symbols-outlined text-[#8c909f] hover:text-[#4edea3] transition-colors cursor-pointer text-[20px]">notifications</span>
           <div className="w-8 h-8 bg-[#272a31] border border-[#424754] flex items-center justify-center">
             <span className="font-data-md text-[9px] font-bold text-[#e1e2ec]">H</span>
@@ -228,12 +243,16 @@ export default function App() {
 
           {/* Page content */}
           <div className="flex-1 overflow-hidden">
-            {page === 'genomic'    && <Dashboard articles={dashArticles} researchContext={researchContext} loading={dashLoading} query={dashQuery} onSearch={handleSearch} onNavigate={handleNavigate} />}
-            {page === 'literature' && <LiteratureSearch />}
-            {page === 'protein'    && <ProteinViewer onNavigate={handleNavigate} />}
-            {page === 'clinical'   && <ClinicalTrials />}
-            {page === 'system'     && <SystemConfig />}
-            {page === 'instrument' && activeTool && <InstrumentPanel toolId={activeTool} onToolSelect={handleToolSelect} />}
+            {page === 'genomic'           && <Dashboard articles={dashArticles} researchContext={researchContext} loading={dashLoading} query={dashQuery} onSearch={handleSearch} onNavigate={handleNavigate} />}
+            {page === 'literature'        && <LiteratureSearch />}
+            {page === 'genomics-explorer' && <GenomicsExplorer onNavigate={handleNavigate} onSendToProtein={handleSendToProtein} />}
+            {page === 'protein'           && (
+              <Suspense fallback={<ProteinViewerFallback />}>
+                <ProteinViewer onNavigate={handleNavigate} target={proteinTarget} />
+              </Suspense>
+            )}
+            {page === 'clinical'          && <ClinicalTrials />}
+            {page === 'instrument'        && activeTool && <InstrumentPanel toolId={activeTool} onToolSelect={handleToolSelect} />}
           </div>
 
           {/* Status bar */}
@@ -261,6 +280,12 @@ export default function App() {
           onNavigate={handleNavigate}
         />
       </div>
+
+      {showSystemMonitor && (
+        <div className="absolute top-14 right-6 z-[100]">
+          <SystemMonitor onClose={() => setShowSystemMonitor(false)} />
+        </div>
+      )}
     </div>
   )
 }

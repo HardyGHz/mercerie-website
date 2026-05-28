@@ -5,11 +5,14 @@ async functions using httpx — no external science-skills-common dependency.
 """
 
 import os
+import time
 import urllib.parse
 import xml.etree.ElementTree as ET
 from typing import Any
 
 import httpx
+
+import telemetry
 
 EUTILS_BASE = "https://eutils.ncbi.nlm.nih.gov"
 PMC_BIOC_BASE = "https://www.ncbi.nlm.nih.gov/research/bionlp/RESTful/pmcoa.cgi/BioC_json"
@@ -39,10 +42,16 @@ async def search_pubmed(query: str, max_results: int = 10) -> list[str]:
         "sort": "relevance",
         "retmode": "json",
     }
-    async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
-        r = await client.get(f"{EUTILS_BASE}/entrez/eutils/esearch.fcgi", params=params)
-        r.raise_for_status()
-        data = r.json()
+    started = time.monotonic()
+    try:
+        async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
+            r = await client.get(f"{EUTILS_BASE}/entrez/eutils/esearch.fcgi", params=params)
+            r.raise_for_status()
+            data = r.json()
+        telemetry.record_pubmed_call(time.monotonic() - started, error=False)
+    except Exception:
+        telemetry.record_pubmed_call(time.monotonic() - started, error=True)
+        raise
     return data["esearchresult"]["idlist"]
 
 
@@ -57,10 +66,16 @@ async def fetch_article_abstracts(pmids: list[str]) -> list[dict[str, Any]]:
         "rettype": "abstract",
         "retmode": "xml",
     }
-    async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
-        r = await client.get(f"{EUTILS_BASE}/entrez/eutils/efetch.fcgi", params=params)
-        r.raise_for_status()
-        xml_text = r.text
+    started = time.monotonic()
+    try:
+        async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
+            r = await client.get(f"{EUTILS_BASE}/entrez/eutils/efetch.fcgi", params=params)
+            r.raise_for_status()
+            xml_text = r.text
+        telemetry.record_pubmed_call(time.monotonic() - started, error=False)
+    except Exception:
+        telemetry.record_pubmed_call(time.monotonic() - started, error=True)
+        raise
 
     root = ET.fromstring(xml_text)
     results = []

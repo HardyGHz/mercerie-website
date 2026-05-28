@@ -55,6 +55,66 @@ class VariantEnrichRequest(BaseModel):
     gene: str | None = None
     variants: list[str]  # variant ID-k, pl. ["R175H", "G245S"]
 
+class GenomicsRequest(BaseModel):
+    gene: str = Field(..., min_length=1, max_length=32)
+    variants: list[str] = Field(..., min_length=1, max_length=20)
+
+class PopulationFreq(BaseModel):
+    id: str | None
+    af: float | None
+
+class GenomicsVariant(BaseModel):
+    id: str
+    freq: str
+    af: float | None
+    gnomad_variant_id: str | None
+    populations: list[PopulationFreq]
+    status: str
+    cls: str
+
+class GenomicsResponse(BaseModel):
+    gene: str
+    variants: list[GenomicsVariant]
+
+class ProteinRequest(BaseModel):
+    gene: str = Field(..., min_length=1, max_length=32)
+    variant: str | None = Field(default=None, max_length=32)
+
+class AlphaFoldInfo(BaseModel):
+    uniprot_id: str | None = None
+    cif_url: str | None = None
+    pdb_url: str | None = None
+    pae_url: str | None = None
+    sequence: str | None = None
+    sequence_length: int | None = None
+    mean_plddt: float | None = None
+    confidence_band: str | None = None
+    model_created_date: str | None = None
+    organism_name: str | None = None
+    gene_symbol: str | None = None
+    uniprot_description: str | None = None
+    entry_id: str | None = None
+    error: str | None = None
+
+class PdbEntry(BaseModel):
+    pdb_id: str
+    title: str | None = None
+    resolution_a: float | None = None
+    method: str | None = None
+    chain_count: int | None = None
+    residue_count: int | None = None
+    cif_url: str | None = None
+    pdb_url: str | None = None
+
+class ProteinResponse(BaseModel):
+    gene: str
+    uniprot_id: str | None = None
+    alphafold: AlphaFoldInfo | None = None
+    pdb_entries: list[PdbEntry] = []
+    variant: str | None = None
+    residue_position: int | None = None
+    error: str | None = None
+
 class ResearchContext(BaseModel):
     gene: str | None
     variants: list[VariantInfo]
@@ -72,6 +132,12 @@ class SearchResponse(BaseModel):
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     logger.info("Novu Research API starting...")
+    # Seed the dashboard with the current cache size so it isn't 0 on first paint.
+    try:
+        from db import refresh_cache_count
+        await refresh_cache_count()
+    except Exception as e:
+        logger.warning("cache_count_seed_failed err=%s", e)
     yield
     logger.info("Novu Research API stopped.")
 
@@ -89,6 +155,23 @@ app.add_middleware(
 @app.get("/health")
 async def health() -> dict[str, str]:
     return {"status": "ok"}
+
+
+import telemetry
+
+
+@app.get("/api/system/stats")
+async def system_stats() -> dict[str, Any]:
+    """Return real-time Novu OS telemetry (Brain, Data Bus, PubMed, DB, Cache).
+
+    Values come from in-memory counters populated by the agent, PubMed tools,
+    and the Supabase cache layer. Between activity, the last observed values
+    persist so the dashboard picks up exactly where it left off.
+    """
+    from db import _get_client
+    telemetry.set_db_status("CONNECTED" if _get_client() is not None else "OFFLINE")
+    return telemetry.snapshot()
+
 
 
 @app.post("/api/search", response_model=SearchResponse)
@@ -110,7 +193,7 @@ async def search(req: SearchRequest) -> Any:
 
 @app.post("/api/enrichment", response_model=list[VariantInfo])
 async def enrichment(req: VariantEnrichRequest) -> Any:
-    """Enrich variant IDs with ClinVar pathogenicity data."""
+    """Enrich variant IDs with ClinVar pathogenicity + gnomAD frequency."""
     if not req.variants:
         return []
     try:
@@ -118,6 +201,30 @@ async def enrichment(req: VariantEnrichRequest) -> Any:
         return await run_enrichment(req.gene, req.variants)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Enrichment failed: {e}")
+
+
+@app.post("/api/genomics", response_model=GenomicsResponse)
+async def genomics(req: GenomicsRequest) -> Any:
+    """Full genomics enrichment for the GenomicsExplorer page (ClinVar + gnomAD with detail)."""
+    try:
+        from agent import run_genomics_lookup
+        return await run_genomics_lookup(req.gene, req.variants)
+    except Exception as e:
+        import db
+        await db.log_error("backend", type(e).__name__, str(e), {"gene": req.gene, "variants": req.variants})
+        raise HTTPException(status_code=500, detail=f"Genomics lookup failed: {e}")
+
+
+@app.post("/api/protein", response_model=ProteinResponse)
+async def protein(req: ProteinRequest) -> Any:
+    """Resolve gene → UniProt → AlphaFold + PDB. Used by the ProteinViewer page."""
+    try:
+        from agent import run_protein_lookup
+        return await run_protein_lookup(req.gene, req.variant)
+    except Exception as e:
+        import db
+        await db.log_error("backend", type(e).__name__, str(e), {"gene": req.gene, "variant": req.variant})
+        raise HTTPException(status_code=500, detail=f"Protein lookup failed: {e}")
 
 
 @app.post("/api/search/direct", response_model=SearchResponse)

@@ -26,7 +26,6 @@ const PAGE_OPS: Record<Page, { primary: { icon: string; label: string }; seconda
   'literature':        { primary: { icon: 'library_add',    label: 'SEARCH PAPERS' }, secondary: { icon: 'csv',       label: 'EXPORT CSV'    } },
   'protein':           { primary: { icon: 'play_arrow',     label: 'RUN ANALYSIS'  }, secondary: { icon: 'download',  label: 'EXPORT PDB'    } },
   'clinical':          { primary: { icon: 'clinical_notes', label: 'FETCH TRIALS'  }, secondary: { icon: 'download',  label: 'EXPORT JSON'   } },
-  'system':            { primary: { icon: 'save',           label: 'SAVE CONFIG'   }, secondary: { icon: 'refresh',   label: 'RESET'         } },
   'genomics-explorer': { primary: { icon: 'genetics',       label: 'EXPLORE'       }, secondary: { icon: 'download',  label: 'EXPORT'        } },
   'instrument':        { primary: { icon: 'play_arrow',     label: 'RUN TOOL'      }, secondary: { icon: 'clear',     label: 'CLEAR'         } },
 }
