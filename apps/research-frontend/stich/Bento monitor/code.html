@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Novu Research OS - Command Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-container": "#00285d",
+                        "background": "#10131a",
+                        "surface-container-high": "#272a31",
+                        "tertiary-fixed": "#e1e0ff",
+                        "inverse-surface": "#e1e2ec",
+                        "surface-container-low": "#191b23",
+                        "primary-fixed": "#d8e2ff",
+                        "surface-container": "#1d2027",
+                        "primary-fixed-dim": "#adc6ff",
+                        "surface-container-highest": "#32353c",
+                        "primary-container": "#4d8eff",
+                        "surface-bright": "#363941",
+                        "surface": "#10131a",
+                        "tertiary-container": "#8083ff",
+                        "surface-variant": "#32353c",
+                        "on-primary-fixed": "#001a42",
+                        "on-error": "#690005",
+                        "on-background": "#e1e2ec",
+                        "on-primary-fixed-variant": "#004395",
+                        "inverse-primary": "#005ac2",
+                        "tertiary": "#c0c1ff",
+                        "on-surface": "#e1e2ec",
+                        "on-primary": "#002e6a",
+                        "outline": "#8c909f",
+                        "on-secondary-container": "#00311f",
+                        "outline-variant": "#424754",
+                        "on-tertiary": "#1000a9",
+                        "on-secondary": "#003824",
+                        "on-secondary-fixed": "#002113",
+                        "secondary-fixed": "#6ffbbe",
+                        "on-tertiary-container": "#0d0096",
+                        "error": "#ffb4ab",
+                        "inverse-on-surface": "#2e3038",
+                        "surface-tint": "#adc6ff",
+                        "on-secondary-fixed-variant": "#005236",
+                        "tertiary-fixed-dim": "#c0c1ff",
+                        "surface-container-lowest": "#0b0e15",
+                        "secondary": "#4edea3",
+                        "primary": "#adc6ff",
+                        "secondary-fixed-dim": "#4edea3",
+                        "on-surface-variant": "#c2c6d6",
+                        "on-tertiary-fixed-variant": "#2f2ebe",
+                        "secondary-container": "#00a572",
+                        "on-error-container": "#ffdad6",
+                        "surface-dim": "#10131a",
+                        "error-container": "#93000a",
+                        "on-tertiary-fixed": "#07006c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "gutter": "16px",
+                        "bento-gap": "12px",
+                        "margin-desktop": "32px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "data-lg": ["JetBrains Mono"],
+                        "headline-lg-mobile": ["Geist"],
+                        "body-md": ["Geist"],
+                        "display": ["Geist"],
+                        "body-lg": ["Geist"],
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-md": ["Geist"],
+                        "data-md": ["JetBrains Mono"],
+                        "headline-lg": ["Geist"]
+                    },
+                    "fontSize": {
+                        "data-lg": ["16px", { "lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "body-md": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "display": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "label-caps": ["11px", { "lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "headline-md": ["20px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "data-md": ["13px", { "lineHeight": "1.4", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #09090b; color: #e1e2ec; overflow: hidden; }
+        .bento-card { background-color: #18181b; border: 1px solid #27272a; }
+        .bento-card:hover { border-color: #3f3f46; box-shadow: inset 0 0 4px 0 rgba(78, 222, 163, 0.05); }
+        .data-panel { background-color: #1c1c1f; border: 1px solid #27272a; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #18181b; border-left: 1px solid #27272a; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 0; }
+        ::-webkit-scrollbar-thumb:hover { background: #424754; }
+
+        .pulse-dot { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+    </style>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/></head>
+<body class="h-screen w-screen flex flex-col font-body-md text-on-surface">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center px-margin-desktop w-full z-50 bg-surface-container-lowest docked full-width top-0 h-14 border-b border-outline-variant">
+<div class="flex items-center gap-4 w-1/3">
+<span class="font-headline-md text-headline-md font-bold tracking-tighter text-on-surface">NOVU RESEARCH OS</span>
+</div>
+<div class="w-1/3 flex justify-center">
+<div class="flex items-center bg-surface-container border border-outline-variant px-3 py-1.5 w-full max-w-md">
+<span class="material-symbols-outlined text-on-surface-variant text-sm mr-2" data-icon="search">search</span>
+<input class="bg-transparent border-none text-on-surface font-data-md text-data-md focus:ring-0 w-full placeholder:text-on-surface-variant/50 p-0" placeholder="QUERY DATABASE..." type="text"/>
+</div>
+</div>
+<div class="w-1/3 flex justify-end items-center gap-4">
+<button class="text-on-surface-variant hover:bg-surface-container-highest transition-colors p-1">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:bg-surface-container-highest transition-colors p-1">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<button class="text-on-surface-variant hover:bg-surface-container-highest transition-colors p-1">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</button>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-14 h-[calc(100vh-56px)] flex flex-col items-center py-4 z-40 bg-surface-container-lowest w-16 border-r border-outline-variant">
+<div class="flex flex-col gap-6 items-center flex-1 w-full">
+<button class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container p-2 w-full flex justify-center hover:translate-x-1 transition-all" title="Workspace">
+<span class="material-symbols-outlined" data-icon="grid_view">grid_view</span>
+</button>
+<button class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container p-2 w-full flex justify-center hover:translate-x-1 transition-all" title="Genomics">
+<span class="material-symbols-outlined" data-icon="dna">genetics</span>
+</button>
+<button class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container p-2 w-full flex justify-center hover:translate-x-1 transition-all" title="Neural">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+</button>
+<button class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container p-2 w-full flex justify-center hover:translate-x-1 transition-all" title="Proteomics">
+<span class="material-symbols-outlined" data-icon="science">science</span>
+</button>
+<button class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container p-2 w-full flex justify-center hover:translate-x-1 transition-all" title="History">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+</button>
+<button class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container p-2 w-full flex justify-center hover:translate-x-1 transition-all" title="Queue">
+<span class="material-symbols-outlined" data-icon="list_alt">list_alt</span>
+</button>
+<button class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container p-2 w-full flex justify-center hover:translate-x-1 transition-all" title="Vault">
+<span class="material-symbols-outlined" data-icon="lock">lock</span>
+</button>
+<!-- Active Tab: Terminal / Co-Pilot -->
+<button class="text-secondary bg-surface-container-high border-l-2 border-secondary p-2 w-full flex justify-center scale-95 duration-75" title="Terminal">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+</button>
+</div>
+<div class="mt-auto flex flex-col gap-4 items-center w-full">
+<button class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container p-2 w-full flex justify-center hover:translate-x-1 transition-all" title="Telemetry">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+</button>
+<button class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container p-2 w-full flex justify-center hover:translate-x-1 transition-all" title="Help">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+</div>
+</nav>
+<!-- Main Canvas -->
+<main class="ml-16 flex-1 flex bg-[#09090b] relative">
+<!-- Central Stage: 3D Visualization -->
+<div class="flex-1 flex flex-col p-6">
+<div class="flex justify-between items-center mb-4 z-20 relative">
+<div class="flex items-center gap-2">
+<span class="font-label-caps text-label-caps text-on-surface-variant">SYS-01 // VISUALIZATION</span>
+<div class="h-[1px] w-8 bg-outline-variant"></div>
+</div>
+<div class="flex gap-2">
+<button class="px-3 py-1 border border-outline-variant text-on-surface font-label-caps text-label-caps hover:bg-surface-container">PAN</button>
+<button class="px-3 py-1 border border-outline-variant text-on-surface font-label-caps text-label-caps hover:bg-surface-container">ZOOM</button>
+<button class="px-3 py-1 border border-secondary bg-secondary/10 text-secondary font-label-caps text-label-caps">ROTATE</button>
+</div>
+</div>
+<div class="flex-1 border border-outline-variant bg-[#09090b] relative overflow-hidden flex items-center justify-center">
+<!-- Grid background -->
+<div class="absolute inset-0 z-0" style="background-image: linear-gradient(#27272a 1px, transparent 1px), linear-gradient(90deg, #27272a 1px, transparent 1px); background-size: 40px 40px; opacity: 0.2;"></div>
+<!-- Decorative corner markers -->
+<div class="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-outline-variant z-10"></div>
+<div class="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-outline-variant z-10"></div>
+<div class="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-outline-variant z-10"></div>
+<div class="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-outline-variant z-10"></div>
+<!-- Molecule 3D Vis Background -->
+<div class="absolute inset-0 flex items-center justify-center p-8 z-20">
+<div class="grid grid-cols-2 grid-rows-2 gap-bento-gap w-full h-full font-data-md">
+<!-- Pane 1: CPU Load -->
+<div class="border border-outline-variant bg-[#09090b] p-4 flex flex-col relative">
+<div class="flex justify-between items-start mb-2">
+<span class="text-on-surface-variant text-[10px] uppercase tracking-widest">CPU_STATUS_CORE</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm cursor-pointer hover:text-secondary">settings</span>
+</div>
+<div class="flex-1 flex items-center justify-center relative">
+<!-- Circular Gauge Simulation -->
+<div class="w-32 h-32 rounded-full border-4 border-secondary/20 flex items-center justify-center relative">
+<div class="absolute inset-0 rounded-full border-4 border-secondary border-t-transparent animate-pulse"></div>
+<div class="text-center">
+<div class="text-2xl font-bold text-secondary">100%</div>
+<div class="text-[10px] text-on-surface-variant uppercase">CPU LOAD</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-2 mt-4 text-[10px] border-t border-outline-variant/30 pt-3">
+<div class="flex flex-col"><span class="text-on-surface-variant">TEMP</span><span class="text-secondary">73°C</span></div>
+<div class="flex flex-col"><span class="text-on-surface-variant">FREQ</span><span class="text-secondary">3296 MHz</span></div>
+<div class="flex flex-col"><span class="text-on-surface-variant">VOLT</span><span class="text-secondary">1185 mV</span></div>
+</div>
+</div>
+<!-- Pane 2: Memory -->
+<div class="border border-outline-variant bg-[#09090b] p-4 flex flex-col relative">
+<div class="flex justify-between items-start mb-2">
+<span class="text-on-surface-variant text-[10px] uppercase tracking-widest">MEM_ALLOCATION</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm cursor-pointer hover:text-secondary">settings</span>
+</div>
+<div class="flex-1 flex items-center justify-center gap-6">
+<div class="w-24 h-24 rounded-full border-4 border-secondary flex items-center justify-center">
+<span class="text-xl font-bold text-secondary">88%</span>
+</div>
+<div class="flex flex-col gap-2">
+<div class="text-[10px] text-on-surface-variant">CAPACITY: <span class="text-on-surface">8 GB</span></div>
+<div class="text-[10px] text-on-surface-variant">CLOCK: <span class="text-on-surface">3200 MHz</span></div>
+<button class="mt-2 px-3 py-1 bg-secondary/10 border border-secondary text-secondary text-[10px] uppercase hover:bg-secondary/20 transition-colors">Clear Memory</button>
+</div>
+</div>
+</div>
+<!-- Pane 3: Power -->
+<div class="border border-outline-variant bg-[#09090b] p-4 flex flex-col relative">
+<div class="flex justify-between items-start mb-2">
+<span class="text-on-surface-variant text-[10px] uppercase tracking-widest">PWR_MGMT</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm cursor-pointer hover:text-secondary">settings</span>
+</div>
+<div class="flex-1 flex items-center px-6 gap-8">
+<div class="h-24 w-12 border border-outline-variant relative p-1">
+<div class="bg-secondary w-full h-4/5 mt-auto"></div>
+<span class="material-symbols-outlined absolute inset-0 flex items-center justify-center text-on-surface mix-blend-difference" style="font-size: 20px;">bolt</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="text-xs text-on-surface-variant">STATUS: <span class="text-secondary">Active</span></span>
+<span class="text-xs text-on-surface-variant">HEALTH: <span class="text-on-surface">Nominal</span></span>
+<a class="text-[10px] text-secondary underline mt-2" href="#">Battery Care</a>
+</div>
+</div>
+</div>
+<!-- Pane 4: Storage -->
+<div class="border border-outline-variant bg-[#09090b] p-4 flex flex-col relative">
+<div class="flex justify-between items-start mb-2">
+<span class="text-on-surface-variant text-[10px] uppercase tracking-widest">DISK_VOLUMES</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm cursor-pointer hover:text-secondary">settings</span>
+</div>
+<div class="flex-1 flex flex-col justify-center gap-4">
+<div class="space-y-1">
+<div class="flex justify-between text-[10px]">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs">hard_drive</span> C: DATA_ROOT</span>
+<span class="text-secondary">94%</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest">
+<div class="h-full bg-secondary" style="width: 94%"></div>
+</div>
+<div class="text-[9px] text-on-surface-variant">110 / 116 GB</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[10px]">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-xs">hard_drive</span> D: ARCHIVE</span>
+<span class="text-secondary">48%</span>
+</div>
+<div class="h-1.5 w-full bg-surface-container-highest">
+<div class="h-full bg-secondary" style="width: 48%"></div>
+</div>
+<div class="text-[9px] text-on-surface-variant">56 / 116 GB</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Overlay UI panels -->
+<div class="absolute inset-0 flex flex-col justify-between p-12 pointer-events-none z-10">
+<!-- Top Section -->
+<div class="flex gap-6 pointer-events-auto">
+<!-- Left Module (Smaller) -->
+<div class="w-1/3 border border-outline-variant bg-[#09090b]/80 p-4 backdrop-blur-sm flex flex-col h-24">
+<span class="font-label-caps text-label-caps text-on-surface-variant">NODE_SELECTION</span>
+<div class="mt-auto font-data-md text-data-md flex justify-between">
+<span class="text-secondary">X: 14.22</span>
+<span class="text-secondary">Y: -8.04</span>
+<span class="text-secondary">Z: 0.11</span>
+</div>
+</div>
+<!-- Right Module (Wider) -->
+<div class="flex-1 border border-outline-variant bg-[#09090b]/80 p-4 backdrop-blur-sm flex flex-col h-24">
+<span class="font-label-caps text-label-caps text-on-surface-variant">SPECTRAL_ANALYSIS</span>
+<div class="flex gap-1 h-full items-end mt-2 opacity-70">
+<div class="w-2 bg-secondary h-[40%]"></div>
+<div class="w-2 bg-secondary h-[70%]"></div>
+<div class="w-2 bg-secondary h-[30%]"></div>
+<div class="w-2 bg-secondary h-[90%]"></div>
+<div class="w-2 bg-secondary h-[50%]"></div>
+<div class="w-2 bg-secondary h-[20%]"></div>
+<div class="w-2 bg-secondary h-[80%]"></div>
+<div class="w-2 bg-secondary h-[60%]"></div>
+<div class="w-2 bg-secondary h-[75%]"></div>
+<div class="w-2 bg-secondary h-[45%]"></div>
+<div class="w-2 bg-secondary h-[85%]"></div>
+<div class="w-2 bg-secondary h-[55%]"></div>
+</div>
+</div>
+</div>
+<!-- Bottom Section -->
+<div class="w-full border border-outline-variant bg-[#09090b]/80 p-4 backdrop-blur-sm flex justify-between items-end h-24 pointer-events-auto mt-auto">
+<div class="flex flex-col gap-1 font-data-md text-data-md text-on-surface-variant">
+<span class="text-on-surface">STRUCT: PDB_ID_7XYZ</span>
+<span>RES: 1.4 Å</span>
+<span>CHAIN: A, B</span>
+</div>
+<div class="flex gap-8">
+<div class="flex flex-col items-end font-data-md text-data-md">
+<span class="text-on-surface-variant text-xs">ENERGY</span>
+<span class="text-secondary">-428.4 kcal/mol</span>
+</div>
+<div class="flex flex-col items-end font-data-md text-data-md">
+<span class="text-on-surface-variant text-xs">RMSD</span>
+<span class="text-secondary">0.84 Å</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Sidebar: AI Co-Pilot Monitor -->
+<aside class="w-80 border-l border-outline-variant bg-[#18181b] flex flex-col shrink-0" style="background-color: #09090b; border-color: #27272a; font-family: 'IBM Plex Mono', monospace;">
+<div class="h-14 border-b border-outline-variant flex items-center justify-between px-4 bg-surface-container-lowest"><div class="flex items-center gap-2"><span class="material-symbols-outlined text-secondary text-sm" data-icon="memory">memory</span><span class="font-label-caps text-label-caps text-on-surface">AI CO-PILOT</span></div><div class="flex items-center gap-2 border border-secondary px-2 py-0.5 bg-secondary/10"><div class="w-2 h-2 rounded-full bg-secondary pulse-dot"></div><span class="font-label-caps text-label-caps text-secondary">LIVE</span></div></div>
+<div class="flex-1 overflow-y-auto p-4 flex flex-col gap-bento-gap">
+<!-- Module: Load -->
+<div class="data-panel p-4 flex flex-col gap-3" style="background-color: #09090b; border: 1px solid #27272a;"><div class="flex justify-between items-center"><span class="text-[11px] uppercase tracking-wider text-on-surface-variant">API_LOAD</span><span class="text-sm text-secondary">842 req/s</span></div><div class="h-12 w-full flex items-end gap-[1px]"><div class="flex-1 bg-secondary/20 h-[30%]"></div><div class="flex-1 bg-secondary/30 h-[45%]"></div><div class="flex-1 bg-secondary/20 h-[20%]"></div><div class="flex-1 bg-secondary/40 h-[60%]"></div><div class="flex-1 bg-secondary/60 h-[85%]"></div><div class="flex-1 bg-secondary/40 h-[50%]"></div><div class="flex-1 bg-secondary/50 h-[75%]"></div><div class="flex-1 bg-secondary h-[95%]"></div><div class="flex-1 bg-secondary/40 h-[55%]"></div><div class="flex-1 bg-secondary/20 h-[35%]"></div><div class="flex-1 bg-secondary/30 h-[45%]"></div><div class="flex-1 bg-secondary/20 h-[25%]"></div><div class="flex-1 bg-secondary/60 h-[80%]"></div><div class="flex-1 bg-secondary/50 h-[70%]"></div><div class="flex-1 bg-secondary/70 h-[90%]"></div><div class="flex-1 bg-secondary h-[100%]"></div><div class="flex-1 bg-secondary/40 h-[65%]"></div><div class="flex-1 bg-secondary/30 h-[55%]"></div><div class="flex-1 bg-secondary/20 h-[40%]"></div><div class="flex-1 bg-secondary/50 h-[80%]"></div></div></div>
+<!-- Module: Vitals -->
+<div class="data-panel p-4 flex flex-col gap-3" style="background-color: #09090b; border: 1px solid #27272a;"><span class="text-[11px] uppercase tracking-wider text-on-surface-variant">SYSTEM_VITALS</span><div class="space-y-2"><div class="flex flex-col gap-1"><div class="flex justify-between text-xs"><span class="text-on-surface-variant">Core Temp</span><span class="text-on-surface">38.4°C</span></div><div class="h-1 bg-surface-container-highest w-full"><div class="bg-secondary h-full" style="width: 38%"></div></div></div><div class="flex flex-col gap-1"><div class="flex justify-between text-xs"><span class="text-on-surface-variant">Latency</span><span class="text-secondary">8ms</span></div><div class="h-1 bg-surface-container-highest w-full"><div class="bg-secondary h-full" style="width: 15%"></div></div></div><div class="flex flex-col gap-1"><div class="flex justify-between text-xs"><span class="text-on-surface-variant">Memory</span><span class="text-on-surface">64.2 GB</span></div><div class="h-1 bg-surface-container-highest w-full"><div class="bg-secondary h-full" style="width: 64%"></div></div></div></div></div>
+<!-- Module: Workspace -->
+<div class="data-panel p-4 flex flex-col gap-3" style="background-color: #09090b; border: 1px solid #27272a;"><span class="text-[11px] uppercase tracking-wider text-on-surface-variant">WORKSPACE_STATUS</span><div class="flex items-center gap-2 text-xs"><span class="material-symbols-outlined text-[14px] text-on-surface-variant" data-icon="folder">folder</span><span class="text-on-surface">BRANCH: main</span></div><div class="flex flex-col gap-1 mt-1"><div class="flex items-center gap-2 text-xs"><div class="w-2 h-2 bg-primary"></div><span class="text-on-surface">MODIFIED (2)</span></div><div class="flex items-center gap-2 text-xs"><div class="w-2 h-2 bg-secondary"></div><span class="text-on-surface">NEW FILES (2)</span></div></div></div>
+<!-- Module: Logs -->
+<div class="data-panel p-4 flex flex-col gap-3 flex-1" style="background-color: #09090b; border: 1px solid #27272a;"><span class="text-[11px] uppercase tracking-wider text-on-surface-variant">COMMIT_LOG</span><div class="flex flex-col gap-3 text-xs font-mono"><div class="border-l border-outline-variant pl-2 py-0.5"><span class="text-secondary">&gt; feat: implement data bus</span><span class="text-[10px] text-on-surface-variant block mt-1 opacity-60">12:04:22</span></div><div class="border-l border-outline-variant pl-2 py-0.5"><span class="text-on-surface">&gt; refactor: dynamic widgets</span><span class="text-[10px] text-on-surface-variant block mt-1 opacity-60">11:58:10</span></div><div class="border-l border-outline-variant pl-2 py-0.5"><span class="text-on-surface">&gt; fix: memory leak in viz</span><span class="text-[10px] text-on-surface-variant block mt-1 opacity-60">11:42:05</span></div></div><div class="mt-auto border-t border-outline-variant/30 pt-2"><div class="flex items-center text-xs text-secondary"><span>&gt;</span><span class="ml-2 w-2 h-4 bg-secondary animate-pulse"></span></div></div></div>
+</div>
+</aside>
+</main>
+</div>
+<!-- Footer -->
+<footer class="fixed bottom-0 left-0 w-full flex justify-between items-center px-4 z-50 bg-surface-container-lowest docked full-width h-8 border-t border-outline-variant">
+<span class="font-data-md text-data-md text-on-surface-variant">NOVU_SYS_CORE // LATENCY: 12ms // TEMP: 34C</span>
+<div class="flex gap-4">
+<span class="font-label-caps text-label-caps text-secondary">STATUS_OK</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant hover:text-secondary cursor-pointer">ENCRYPT_AES_256</span>
+</div>
+</footer>
+</body></html>

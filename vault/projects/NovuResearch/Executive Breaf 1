@@ -1,0 +1,30 @@
+# Executive Brief – Novu Research OS – 2026-05-27
+
+## 📍 Current State (One Sentence)
+Phase I is complete and committed to GitHub: the frontend Data Bus architecture is live, dynamic Bento widgets respond to real PubMed data, and all core documentation is written — Phase II (ClinVar API, real NLP, Auth) has not yet started.
+
+---
+
+## ✅ What's Working (TOP 3)
+1. **Data Bus + Dynamic Widgets** — `App.tsx` + `entityExtractor.ts` wire real PubMed search results into the Genomics and Proteomics Bento cells automatically. The infinite re-render bug is fixed cleanly with a `prevLoadingRef` pattern.
+2. **End-to-End PubMed Search** — FastAPI backend + Gemini function calling + frontend display is a working pipeline. The user can type a query and get real scientific literature back.
+3. **Documentation & Architecture** — `CLAUDE.md`, `NOVU_RESEARCH_MANUAL.md`, `README.md`, and session summaries are all written, committed, and available for any AI agent (Gemini or Claude) to pick up context instantly on the next session.
+
+---
+
+## ⚠️ Risks & Gaps
+- **`entityExtractor.ts` is regex-only, 14 hardcoded genes** — Any search query for FOXP2, APOE, or any gene outside the list produces an empty Genomics widget. This is the biggest gap between the current MVP and a credible product demo.
+- **ClinVar is not integrated** — Pathogenicity status is derived by checking if the word "pathogenic" appears in a PubMed abstract. This can produce actively misleading data, which is a liability for a science-facing product.
+- **No Auth** — The platform is currently a single open session with no user identity. This blocks any form of commercialization, usage tracking, or SaaS billing.
+
+---
+
+## 🎯 Next Priority Actions
+1. **ClinVar API integration** (`backend/tools/clinvar.py`) — Replaces the fake text-matching pathogenicity with a real classification lookup. This is the single change that most directly increases the product's scientific credibility and differentiates it from a simple PubMed search UI.
+2. **Backend Gemini NLP for Entity Extraction** — Replace the 14-gene regex in `entityExtractor.ts` with a structured JSON response from the existing Gemini function calling loop. The infrastructure is already there; it just needs to be wired up.
+3. **`FEATURE_BENTO_MONITOR.md` implementation** — The Live AI Co-Pilot Monitor widget (`/api/dev/workspace-status` + chip icon toggle + `AiMonitorWidget.tsx`) is fully specified. This is a high-impact, low-risk build that adds a unique "wow" differentiator for investor and client demos.
+
+---
+
+## 💡 CEO Decision Point
+**What is the target date for the first external beta user?** This single answer determines whether Auth (Supabase Google Login) jumps to #1 priority above ClinVar, or stays at #4 while the core science features are hardened first.

@@ -1,0 +1,225 @@
+{
+  "main": {
+    "id": "5e2d6333cb3db768",
+    "type": "split",
+    "children": [
+      {
+        "id": "c8bcfb1127eb5add",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "06b3e0463a81d284",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "idea-buffer/2026-05-31-architektura-alapko.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "2026-05-31-architektura-alapko"
+            }
+          },
+          {
+            "id": "a95b235fd92b8ef0",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "architecture/2026-05-31-protein-viewer-fix.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "2026-05-31-protein-viewer-fix"
+            }
+          }
+        ],
+        "currentTab": 1
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "309c0068fd8d92ef",
+    "type": "split",
+    "children": [
+      {
+        "id": "040de232f69c1b1f",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "bc5bbb75493b68c5",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "1564b53e8ee6f0a1",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "d8e7e25fcda3b8f9",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 226.5
+  },
+  "right": {
+    "id": "ed74a721bb41f0ff",
+    "type": "split",
+    "children": [
+      {
+        "id": "214d36858aa0d59a",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "f031160938662650",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "vault/projects/NovuResearch/frontend/node_modules/ms/license.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for license"
+            }
+          },
+          {
+            "id": "74f64d73b9507fae",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "vault/projects/NovuResearch/frontend/node_modules/ms/license.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from license"
+            }
+          },
+          {
+            "id": "c3772376866882c8",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "8f0949a188594f5c",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "f7117957469493a6",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "vault/projects/NovuResearch/frontend/node_modules/ms/license.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of license"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "bc5bbb75493b68c5",
+  "lastOpenFiles": [
+    "idea-buffer/Chat sessionből.md",
+    "architecture/2026-05-31-protein-viewer-fix.md",
+    "idea-buffer/2026-05-31-architektura-alapko.md",
+    "projects/NovuResearch/NOVU_RESEARCH_MANUAL.md",
+    "projects/NovuResearch/SOP_ARCH.md",
+    "projects/NovuResearch/README.md",
+    "projects/NovuResearch/HANDOFF.md",
+    "context/current-priorities.md",
+    "context/goals.md",
+    "context/me.md",
+    "context/team.md",
+    "context/work.md",
+    "projects/ai-mastery/README.md",
+    "projects/sales-process/README.md",
+    "projects/website-build/README.md",
+    "projects/NovuResearch/PLAN_data_bus.md",
+    "projects/NovuResearch/BUILD_SUMMARY_2026-05-26.md",
+    "journal/2026-03-22-visszatekintes.md",
+    "vault/idea-buffer/2026-05-31-architektura-alapko.md",
+    "vault/projects/NovuResearch/knowledge-base/science/skills/literature_search_openalex/SKILL.md",
+    "Untitled.canvas"
+  ]
+}

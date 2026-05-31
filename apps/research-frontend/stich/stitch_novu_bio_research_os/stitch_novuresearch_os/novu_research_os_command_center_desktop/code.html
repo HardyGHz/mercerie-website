@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NOVU RESEARCH OS // COMMAND CENTER</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Geist:wght@400;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #09090b;
+            color: #e1e2ec;
+            font-family: 'IBM Plex Mono', monospace;
+            overflow: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+            font-size: 18px;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #18181b;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3f3f46;
+        }
+        .glass-search {
+            background: rgba(24, 24, 27, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid #27272a;
+        }
+        @keyframes pulse-emerald {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        .animate-pulse-slow {
+            animation: pulse-emerald 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        .bento-grid {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(12, 1fr);
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+<!-- THEME CONFIG -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#32353c",
+                        "on-background": "#e1e2ec",
+                        "tertiary-container": "#8083ff",
+                        "surface-container-low": "#191b23",
+                        "tertiary-fixed": "#e1e0ff",
+                        "on-secondary-fixed-variant": "#005236",
+                        "on-primary-fixed": "#001a42",
+                        "on-primary-fixed-variant": "#004395",
+                        "on-secondary-container": "#00311f",
+                        "surface-variant": "#32353c",
+                        "primary-fixed": "#d8e2ff",
+                        "surface-container": "#1d2027",
+                        "surface-bright": "#363941",
+                        "on-surface-variant": "#c2c6d6",
+                        "tertiary-fixed-dim": "#c0c1ff",
+                        "inverse-surface": "#e1e2ec",
+                        "error-container": "#93000a",
+                        "tertiary": "#c0c1ff",
+                        "secondary-fixed-dim": "#4edea3",
+                        "on-primary": "#002e6a",
+                        "outline": "#8c909f",
+                        "background": "#10131a",
+                        "on-secondary": "#003824",
+                        "surface": "#10131a",
+                        "on-tertiary": "#1000a9",
+                        "primary-container": "#4d8eff",
+                        "secondary-container": "#00a572",
+                        "on-tertiary-fixed-variant": "#2f2ebe",
+                        "inverse-primary": "#005ac2",
+                        "surface-container-lowest": "#0b0e15",
+                        "on-error": "#690005",
+                        "inverse-on-surface": "#2e3038",
+                        "on-tertiary-container": "#0d0096",
+                        "primary-fixed-dim": "#adc6ff",
+                        "primary": "#adc6ff",
+                        "on-primary-container": "#00285d",
+                        "surface-container-high": "#272a31",
+                        "on-error-container": "#ffdad6",
+                        "error": "#ffb4ab",
+                        "surface-tint": "#adc6ff",
+                        "secondary-fixed": "#6ffbbe",
+                        "surface-dim": "#10131a",
+                        "secondary": "#4edea3",
+                        "outline-variant": "#424754",
+                        "on-tertiary-fixed": "#07006c",
+                        "on-surface": "#e1e2ec",
+                        "on-secondary-fixed": "#002113"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Geist"],
+                        "display": ["Geist"],
+                        "data-lg": ["IBM Plex Mono"],
+                        "body-md": ["Geist"],
+                        "label-caps": ["IBM Plex Mono"],
+                        "data-md": ["IBM Plex Mono"],
+                        "body-lg": ["Geist"],
+                        "headline-md": ["Geist"]
+                    }
+                }
+            }
+        }
+    </script>
+<!-- HEADER: TopNavBar -->
+<header class="bg-surface-container-lowest border-b border-outline-variant h-14 flex justify-between items-center px-margin-desktop w-full z-50 shrink-0">
+<div class="flex items-center gap-4">
+<span class="font-headline-md text-headline-md font-bold tracking-tighter text-on-surface">NOVU RESEARCH // OS</span>
+<span class="px-2 py-0.5 border border-secondary text-secondary font-label-caps text-[10px]">V2.0.4-BETA</span>
+</div>
+<div class="flex-1 max-w-2xl px-8">
+<div class="glass-search w-full h-9 flex items-center px-4 gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">search</span>
+<input class="bg-transparent border-none focus:ring-0 w-full font-data-md text-data-md text-on-surface placeholder:text-outline-variant" placeholder="QUERY_SYSTEM_RESOURCES..." type="text"/>
+<span class="font-label-caps text-outline-variant text-[10px]">CMD+K</span>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-on-surface-variant hover:text-secondary transition-colors material-symbols-outlined">memory</button>
+<button class="text-on-surface-variant hover:text-secondary transition-colors material-symbols-outlined">notifications</button>
+<button class="text-on-surface-variant hover:text-secondary transition-colors material-symbols-outlined">settings</button>
+<div class="w-8 h-8 bg-surface-container-high border border-outline-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface text-[20px]">person</span>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- LEFT SIDEBAR: Ultra-slim Workflow Strip -->
+<aside class="w-16 bg-surface-container-lowest border-r border-outline-variant flex flex-col items-center py-4 gap-4 z-40 overflow-y-auto custom-scrollbar">
+<!-- First set of icons as per user request (Literature, Genomics, etc.) -->
+<button class="w-10 h-10 flex items-center justify-center bg-surface-container-high border-l-2 border-secondary text-secondary transition-all" title="Genomics">
+<span class="material-symbols-outlined">genetics</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all" title="Literature">
+<span class="material-symbols-outlined">menu_book</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all" title="Neural">
+<span class="material-symbols-outlined">psychology</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all" title="Proteomics">
+<span class="material-symbols-outlined">science</span>
+</button>
+<!-- Filling to ~37 icons as requested -->
+<script>
+                const extraIcons = ["history", "list_alt", "lock", "terminal", "grid_view", "monitoring", "help", "database", "hub", "lan", "filter_list", "analytics", "bar_chart", "bubble_chart", "scatter_plot", "biotech", "query_stats", "account_tree", "webhook", "settings_input_component", "device_hub", "route", "schema", "architecture", "layers", "model_training", "dataset", "developer_board", "memory", "cpu", "microchip", "waves", "molecule"];
+                document.write(extraIcons.map(icon => `
+                    <button class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-all" title="${icon}">
+                        <span class="material-symbols-outlined">${icon}</span>
+                    </button>
+                `).join(''));
+            </script>
+</aside>
+<!-- MAIN STAGE -->
+<main class="flex-1 flex flex-col bg-surface-container-lowest relative">
+<!-- Context Bar -->
+<div class="h-10 border-b border-outline-variant flex items-center justify-between px-6 bg-surface-container-low">
+<div class="flex items-center gap-4">
+<span class="font-label-caps text-[10px] text-outline">SEC-04 // WORKSPACE</span>
+<div class="flex items-center gap-2">
+<span class="text-secondary font-label-caps text-[11px]">DATA_SOURCE:</span>
+<span class="text-on-surface font-label-caps text-[11px]">GENOMICS_DB_V4</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2">
+<span class="text-outline font-label-caps text-[11px]">CONFIDENCE:</span>
+<span class="text-secondary font-label-caps text-[11px]">98.4%</span>
+</div>
+<div class="w-px h-4 bg-outline-variant"></div>
+<span class="text-outline font-label-caps text-[11px]">LATENCY: 12ms</span>
+</div>
+</div>
+<!-- 3D Protein Display Area -->
+<div class="flex-1 relative flex items-center justify-center p-12 overflow-hidden">
+<!-- Background Grid Pattern -->
+<div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(#4edea3 1px, transparent 1px); background-size: 40px 40px;"></div>
+<!-- Crosshair Overlays -->
+<div class="absolute top-8 left-8 text-outline-variant material-symbols-outlined text-[32px]">add</div>
+<div class="absolute top-8 right-8 text-outline-variant material-symbols-outlined text-[32px]">add</div>
+<div class="absolute bottom-8 left-8 text-outline-variant material-symbols-outlined text-[32px]">add</div>
+<div class="absolute bottom-8 right-8 text-outline-variant material-symbols-outlined text-[32px]">add</div>
+<!-- Main Visual Asset -->
+<div class="relative w-full h-full max-w-4xl flex items-center justify-center">
+<img alt="Molecular Model" class="w-full h-full object-contain mix-blend-lighten opacity-80" data-alt="A high-fidelity 3D visualization of a complex protein structure floating in a dark, minimalist digital environment. The molecular model is composed of glowing emerald green ribbons and translucent spherical atoms, casting a faint technical light on its surroundings. The scene is framed by industrial UI elements, coordinates, and thin white alignment lines. The overall aesthetic is cold, professional, and scientific, focusing on high data density and precision." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmZBKLg9tYltR3yWAtad4-K4ZX1qy-tpEHBsCx7pijzXWJS6vzTZruk4E9FN79-xhpSq87C5ZhTaqX-AJAcJfAtzbCnuqyVvhIvYWEwI-wFxWxzLsRN4UOK6zlG8nJVLFm8D2zdavwdx_8pVg3uK72LlW3mC3XF-kDIElnQr91_DxlhpKlSvi3eN8p8Mu6S8rDuLFbTKClBv0b9sUssdTudw02ioIXo5ANpWKCziS0Zvu-mg2cX_k9ghy6CVQKLcTjjkVvQEiCS5Y"/>
+<!-- Floating Data Pips -->
+<div class="absolute top-1/4 left-1/4 p-2 border border-secondary/30 bg-surface-container-low/50 backdrop-blur-sm">
+<div class="text-[9px] font-label-caps text-secondary">AMINO_ACID_CHAIN: ALPHA</div>
+<div class="text-[12px] font-data-md text-on-surface">THR-241 // LYS-12</div>
+</div>
+<div class="absolute bottom-1/3 right-1/4 p-2 border border-secondary/30 bg-surface-container-low/50 backdrop-blur-sm">
+<div class="text-[9px] font-label-caps text-secondary">BINDING_AFFINITY</div>
+<div class="text-[12px] font-data-md text-on-surface">-9.4 kcal/mol</div>
+</div>
+</div>
+<!-- Overlay Hud Controls -->
+<div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-4 bg-surface-container-low/80 border border-outline-variant px-4 py-2 backdrop-blur-md">
+<button class="p-2 text-on-surface-variant hover:text-secondary material-symbols-outlined">zoom_in</button>
+<button class="p-2 text-on-surface-variant hover:text-secondary material-symbols-outlined">zoom_out</button>
+<div class="w-px h-6 bg-outline-variant"></div>
+<button class="p-2 text-on-surface-variant hover:text-secondary material-symbols-outlined">refresh</button>
+<button class="p-2 text-on-surface-variant hover:text-secondary material-symbols-outlined">layers</button>
+<button class="p-2 text-on-surface-variant hover:text-secondary material-symbols-outlined">3d_rotation</button>
+</div>
+</div>
+<!-- Footer Stats Strip -->
+<footer class="h-8 border-t border-outline-variant flex justify-between items-center px-4 bg-surface-container-lowest z-50 shrink-0">
+<div class="flex items-center gap-4">
+<span class="font-label-caps text-[10px] text-secondary">NOVU_SYS_CORE</span>
+<span class="font-label-caps text-[10px] text-outline">TEMP: 34C</span>
+<span class="font-label-caps text-[10px] text-outline">LOAD: 14.2%</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-label-caps text-[10px] text-secondary">STATUS_OK</span>
+<span class="font-label-caps text-[10px] text-outline">ENCRYPT_AES_256</span>
+</div>
+</footer>
+</main>
+<!-- RIGHT SIDEBAR: Tools & Control -->
+<aside class="w-72 bg-surface-container-lowest border-l border-outline-variant flex flex-col z-40">
+<!-- Action Area -->
+<div class="p-4 flex flex-col gap-3 flex-1">
+<div class="font-label-caps text-[11px] text-outline mb-2">SYSTEM_OPERATIONS</div>
+<button class="w-full bg-secondary text-on-secondary py-2 font-label-caps text-[12px] hover:bg-secondary-fixed transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                    RUN ANALYSIS
+                </button>
+<button class="w-full border border-outline-variant text-on-surface py-2 font-label-caps text-[12px] hover:bg-surface-container transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                    EXPORT PDB
+                </button>
+<div class="mt-6 font-label-caps text-[11px] text-outline mb-2">SEQUENCE_PARAMETERS</div>
+<div class="space-y-4">
+<div class="space-y-1">
+<div class="flex justify-between text-[10px] font-label-caps text-outline">
+<span>THRESHOLD</span>
+<span class="text-on-surface">0.85</span>
+</div>
+<input class="w-full h-1 bg-surface-container-high appearance-none accent-secondary cursor-pointer" type="range"/>
+</div>
+<div class="flex items-center justify-between p-2 border border-outline-variant bg-surface-container-low">
+<span class="text-[10px] font-label-caps text-outline">AUTO_REFINE</span>
+<div class="w-8 h-4 bg-secondary/20 relative cursor-pointer border border-secondary">
+<div class="absolute top-0 right-0 w-4 h-full bg-secondary"></div>
+</div>
+</div>
+</div>
+<!-- Bento Widgets -->
+<div class="mt-8 grid grid-cols-2 gap-3">
+<div class="p-3 border border-outline-variant bg-surface-container-low flex flex-col gap-1">
+<span class="text-[9px] font-label-caps text-outline">ENTROPY</span>
+<span class="text-lg font-data-md text-on-surface">1.24</span>
+</div>
+<div class="p-3 border border-outline-variant bg-surface-container-low flex flex-col gap-1">
+<span class="text-[9px] font-label-caps text-outline">VAR_IDX</span>
+<span class="text-lg font-data-md text-secondary">σ4</span>
+</div>
+</div>
+</div>
+<!-- AI CO-PILOT MONITOR -->
+<div class="h-[40%] border-t border-outline-variant bg-black p-4 flex flex-col">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-secondary animate-pulse-slow"></div>
+<span class="font-label-caps text-[11px] text-secondary">AI_COPILOT_MONITOR</span>
+</div>
+<span class="font-label-caps text-[10px] text-outline">LIVE</span>
+</div>
+<div class="flex-1 overflow-hidden font-data-md text-[11px] text-on-surface-variant flex flex-col gap-1 overflow-y-auto custom-scrollbar">
+<div class="flex justify-between text-outline border-b border-outline-variant/30 pb-1 mb-2">
+<span>MODIFIED (2)</span>
+<span>NEW FILES (2)</span>
+<span>BRANCH: main</span>
+</div>
+<div class="text-secondary/80">&gt;&gt; INITIALIZING_COGNITIVE_ENGINE...</div>
+<div class="text-on-surface-variant">&gt;&gt; SCANNING_SEQUENCE_BUFFER: [OK]</div>
+<div class="text-on-surface-variant">&gt;&gt; PATTERN_MATCHING_ACTIVE...</div>
+<div class="text-on-surface-variant">&gt; Possible tertiary structure found at C-terminus.</div>
+<div class="text-secondary">&gt;&gt; ANALYZING_MUTATION_PROBABILITY...</div>
+<div class="text-on-surface-variant">&gt; Confidence Score: 0.9842</div>
+<div class="text-on-surface-variant">&gt; Trace log ID: #8292-XFA</div>
+<div class="flex items-center gap-1 text-on-surface mt-2">
+<span class="animate-pulse">_</span>
+</div>
+</div>
+</div>
+</aside>
+</div>
+<!-- UI Overlay elements -->
+<div class="fixed bottom-12 right-12 flex flex-col gap-3">
+<button class="w-12 h-12 bg-surface-container-high border border-secondary/50 text-secondary flex items-center justify-center hover:bg-secondary hover:text-on-secondary transition-all shadow-lg" title="NEW_PROJECT">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+<script>
+        // Atmospheric terminal simulation
+        const terminal = document.querySelector('.custom-scrollbar');
+        const logs = [
+            ">> DETECTING_ANOMALIES...",
+            ">> CACHE_PURGED_64KB",
+            ">> SYNCING_REMOTE_REPOS...",
+            ">> NEURAL_MODEL_UPDATING...",
+            ">> CORE_VOLTAGE_STABLE",
+            ">> BINDING_SITE_PREDICTED: GLY-14"
+        ];
+        
+        setInterval(() => {
+            const div = document.createElement('div');
+            div.className = 'text-on-surface-variant opacity-70';
+            div.innerText = logs[Math.floor(Math.random() * logs.length)];
+            const cursor = terminal.lastElementChild;
+            terminal.insertBefore(div, cursor);
+            terminal.scrollTop = terminal.scrollHeight;
+            if(terminal.children.length > 20) terminal.removeChild(terminal.children[1]);
+        }, 4000);
+    </script>
+</body></html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Novu Research // OS - Command Center</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Geist:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #09090b;
+            color: #e1e2ec;
+            font-family: 'Geist', sans-serif;
+            overflow: hidden;
+        }
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            font-size: 20px;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 2px;
+            height: 2px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #18181b;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3f3f46;
+        }
+        @keyframes pulse-dot {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+        .pulse {
+            animation: pulse-dot 2s infinite ease-in-out;
+        }
+    </style>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary": "#002e6a",
+                      "outline": "#8c909f",
+                      "on-secondary-container": "#00311f",
+                      "on-primary-fixed": "#001a42",
+                      "on-error": "#690005",
+                      "on-background": "#e1e2ec",
+                      "surface-variant": "#32353c",
+                      "on-primary-fixed-variant": "#004395",
+                      "tertiary": "#c0c1ff",
+                      "inverse-primary": "#005ac2",
+                      "on-surface": "#e1e2ec",
+                      "surface-container-highest": "#32353c",
+                      "surface-bright": "#363941",
+                      "surface": "#10131a",
+                      "primary-container": "#4d8eff",
+                      "tertiary-container": "#8083ff",
+                      "on-primary-container": "#00285d",
+                      "background": "#10131a",
+                      "tertiary-fixed": "#e1e0ff",
+                      "inverse-surface": "#e1e2ec",
+                      "surface-container-high": "#272a31",
+                      "surface-container-low": "#191b23",
+                      "primary-fixed": "#d8e2ff",
+                      "surface-container": "#1d2027",
+                      "primary-fixed-dim": "#adc6ff",
+                      "on-tertiary-fixed-variant": "#2f2ebe",
+                      "surface-dim": "#10131a",
+                      "secondary-container": "#00a572",
+                      "on-error-container": "#ffdad6",
+                      "error-container": "#93000a",
+                      "on-tertiary-fixed": "#07006c",
+                      "tertiary-fixed-dim": "#c0c1ff",
+                      "surface-container-lowest": "#0b0e15",
+                      "secondary": "#4edea3",
+                      "secondary-fixed-dim": "#4edea3",
+                      "primary": "#adc6ff",
+                      "on-surface-variant": "#c2c6d6",
+                      "on-tertiary-container": "#0d0096",
+                      "inverse-on-surface": "#2e3038",
+                      "error": "#ffb4ab",
+                      "surface-tint": "#adc6ff",
+                      "on-secondary-fixed-variant": "#005236",
+                      "on-secondary": "#003824",
+                      "outline-variant": "#424754",
+                      "on-tertiary": "#1000a9",
+                      "on-secondary-fixed": "#002113",
+                      "secondary-fixed": "#6ffbbe"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "bento-gap": "12px",
+                      "unit": "4px",
+                      "gutter": "16px",
+                      "margin-mobile": "16px",
+                      "margin-desktop": "32px"
+              },
+              "fontFamily": {
+                      "label-caps": ["JetBrains Mono"],
+                      "headline-md": ["Geist"],
+                      "data-md": ["JetBrains Mono"],
+                      "display": ["Geist"],
+                      "body-lg": ["Geist"],
+                      "headline-lg": ["Geist"],
+                      "data-lg": ["JetBrains Mono"],
+                      "headline-lg-mobile": ["Geist"],
+                      "body-md": ["Geist"]
+              },
+              "fontSize": {
+                      "label-caps": ["11px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "headline-md": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                      "data-md": ["13px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                      "display": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                      "data-lg": ["16px", {"lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                      "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface-dim selection:bg-secondary/30">
+<!-- TopAppBar - JSON Execution -->
+<header class="fixed top-0 w-full bg-surface/80 backdrop-blur-md dark:bg-surface/80 text-secondary border-b border-outline-variant flex justify-between items-center px-margin-mobile h-14 w-full z-50">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" data-icon="terminal">terminal</span>
+<h1 class="font-label-caps text-label-caps text-secondary tracking-widest leading-none">
+                NOVU RESEARCH<br/>// OS
+            </h1>
+</div>
+<!-- Floating Glassmorphism Search (Responsive Overlay Style) -->
+<div class="absolute left-1/2 -translate-x-1/2 top-2 h-10 w-[180px] bg-surface-container/40 backdrop-blur-xl border border-outline-variant/30 rounded flex items-center px-3 gap-2 transition-all hover:border-secondary/50">
+<span class="material-symbols-outlined text-on-surface-variant text-[16px]" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-label-caps font-label-caps text-on-surface-variant w-full placeholder:text-outline/50 uppercase" placeholder="Search genes..." type="text"/>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined transition-all duration-200 active:opacity-70 hover:bg-surface-variant/50 p-1 rounded" data-icon="memory">memory</span>
+<span class="material-symbols-outlined transition-all duration-200 active:opacity-70 hover:bg-surface-variant/50 p-1 rounded" data-icon="notifications">notifications</span>
+</div>
+</header>
+<!-- Main Content Grid -->
+<main class="pt-14 pb-16 flex h-screen overflow-hidden">
+<!-- Workflow Strip (Left Slim Vertical) -->
+<aside class="w-12 bg-surface-container-lowest border-r border-outline-variant flex flex-col items-center py-4 gap-6 overflow-y-auto custom-scrollbar">
+<div class="w-1 h-8 bg-secondary rounded-r-sm absolute left-0 top-18"></div>
+<button class="text-secondary p-1"><span class="material-symbols-outlined" data-icon="account_tree">account_tree</span></button>
+<button class="text-on-surface-variant hover:text-secondary p-1"><span class="material-symbols-outlined" data-icon="database">database</span></button>
+<button class="text-on-surface-variant hover:text-secondary p-1"><span class="material-symbols-outlined" data-icon="science">science</span></button>
+<button class="text-on-surface-variant hover:text-secondary p-1"><span class="material-symbols-outlined" data-icon="biotech">biotech</span></button>
+<button class="text-on-surface-variant hover:text-secondary p-1"><span class="material-symbols-outlined" data-icon="monitoring">monitoring</span></button>
+<div class="mt-auto">
+<button class="text-on-surface-variant hover:text-secondary p-1"><span class="material-symbols-outlined" data-icon="settings">settings</span></button>
+</div>
+</aside>
+<!-- Central Stage -->
+<section class="flex-1 flex flex-col bg-surface-dim relative">
+<!-- Context Bar -->
+<div class="h-8 border-b border-outline-variant flex items-center px-4 justify-between bg-surface-container-lowest">
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1">
+<span class="font-label-caps text-[9px] text-outline">SOURCE:</span>
+<span class="font-label-caps text-[9px] text-on-surface uppercase">Genomics_DB_v4</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="font-label-caps text-[9px] text-outline">CONFIDENCE:</span>
+<span class="font-label-caps text-[9px] text-secondary">98.4%</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-secondary pulse"></div>
+<span class="font-label-caps text-[9px] text-outline">LIVE</span>
+</div>
+</div>
+<!-- Content Area: Data Viz -->
+<div class="flex-1 overflow-y-auto custom-scrollbar p-bento-gap grid grid-cols-1 gap-bento-gap pb-24">
+<!-- Main Visualization Card (Protein/Structure) -->
+<div class="relative bg-surface-container-low border border-outline-variant aspect-square overflow-hidden group">
+<div class="absolute top-2 left-2 z-10">
+<div class="font-label-caps text-[10px] text-secondary bg-surface-container-lowest/80 px-2 py-0.5 border border-outline-variant">
+                            SEC-04 // GENOMICS
+                        </div>
+</div>
+<div class="absolute top-2 right-2 z-10 flex flex-col gap-1">
+<div class="w-4 h-4 border border-outline-variant flex items-center justify-center bg-surface-container-lowest"><span class="text-[10px] mono">x</span></div>
+<div class="w-4 h-4 border border-outline-variant flex items-center justify-center bg-surface-container-lowest"><span class="text-[10px] mono">y</span></div>
+<div class="w-4 h-4 border border-outline-variant flex items-center justify-center bg-surface-container-lowest"><span class="text-[10px] mono">z</span></div>
+</div>
+<img class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" data-alt="A highly detailed 3D scientific visualization of a complex protein structure with glowing neon green molecular bonds against a deep black void. The lighting is cold and clinical, emphasizing the intricate industrial design of the biology. The image has a high-density data overlay feel with faint grid lines and coordinate markers, maintaining a dark-mode cyberpunk laboratory aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCG-ilosugq5JDWXSYtSjy2gXd9GbSgryKuSDuo8pE1sVrEgVNtmdaJqsDUvuPUg4W1KdK-h7MIOicGSMgAW5SlmcVTVnkX3mBX9DTtmxTbZTcbfSHzvQqQg0TEhEJnSgjmYuHvTTlaXUqd_E4yWYcpGAOGIPSHjP9CQZ5pl9eWAnFVTQrNLp7lBDnrV_aLDLnX2rJnq31mGFxdddFWzX5mhNN_9-tbEm7rzQSxCmmIIUpUr-3OskeU2kOX86kXma0ufe68-U2a2p4"/>
+<!-- Scanline Overlay -->
+<div class="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%]"></div>
+</div>
+<!-- AI Co-Pilot Monitor -->
+<div class="bg-surface-container-lowest border border-outline-variant p-4">
+<div class="flex justify-between items-center mb-2">
+<span class="font-label-caps text-[10px] text-on-surface">CO-PILOT MONITOR</span>
+<div class="flex items-center gap-2">
+<span class="font-label-caps text-[9px] text-secondary">ACTIVE</span>
+<div class="w-1.5 h-1.5 rounded-full bg-secondary pulse"></div>
+</div>
+</div>
+<div class="mono text-[11px] leading-relaxed text-outline">
+<p class="text-secondary">&gt; INITIATING SEQUENCE_ALPHA_09</p>
+<p>&gt; ANALYZING BASE PAIRS... <span class="text-on-surface">[OK]</span></p>
+<p>&gt; FOLDING SIMULATION AT 44%</p>
+<p class="mt-2 text-on-surface">MODIFIED (2) | NEW FILES (2)</p>
+<p class="text-on-surface">BRANCH: <span class="text-secondary">main</span></p>
+<div class="mt-2 flex gap-1">
+<span class="bg-secondary/10 border border-secondary/30 px-1 py-0.5 text-[9px] text-secondary">A100_NODE_4</span>
+<span class="bg-tertiary/10 border border-tertiary/30 px-1 py-0.5 text-[9px] text-tertiary">GEN_SIM_02</span>
+</div>
+</div>
+</div>
+<!-- Metrics Bento Module -->
+<div class="grid grid-cols-2 gap-bento-gap">
+<div class="bg-surface-container border border-outline-variant p-3 flex flex-col gap-1">
+<span class="font-label-caps text-[9px] text-outline uppercase">Core Temp</span>
+<span class="font-data-lg text-data-lg text-secondary">34.2°C</span>
+<div class="w-full h-1 bg-surface-variant mt-1">
+<div class="w-1/3 h-full bg-secondary"></div>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant p-3 flex flex-col gap-1">
+<span class="font-label-caps text-[9px] text-outline uppercase">Latency</span>
+<span class="font-data-lg text-data-lg text-on-surface">12ms</span>
+<div class="w-full h-1 bg-surface-variant mt-1">
+<div class="w-3/4 h-full bg-on-surface"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar - JSON Execution -->
+<nav class="fixed bottom-0 w-full h-16 bg-surface-container-low dark:bg-surface-container-low border-t border-outline-variant flex justify-around items-center px-margin-mobile z-50">
+<button class="bg-secondary-container/20 text-secondary rounded-lg p-2 scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined" data-icon="bolt">bolt</span>
+</button>
+<button class="text-on-surface-variant p-2 hover:text-secondary scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+</button>
+<button class="text-on-surface-variant p-2 hover:text-secondary scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+</button>
+<button class="text-on-surface-variant p-2 hover:text-secondary scale-95 active:scale-90 transition-transform">
+<span class="material-symbols-outlined" data-icon="more_horiz">more_horiz</span>
+</button>
+</nav>
+<!-- Corner Crosshairs / Industrial Decals -->
+<div class="fixed top-14 left-12 w-3 h-3 border-l border-t border-outline-variant z-10 pointer-events-none"></div>
+<div class="fixed top-14 right-0 w-3 h-3 border-r border-t border-outline-variant z-10 pointer-events-none"></div>
+<div class="fixed bottom-16 left-12 w-3 h-3 border-l border-b border-outline-variant z-10 pointer-events-none"></div>
+<div class="fixed bottom-16 right-0 w-3 h-3 border-r border-b border-outline-variant z-10 pointer-events-none"></div>
+<script>
+        // Micro-interaction for terminal effect
+        const terminalOutput = document.querySelector('.mono');
+        const phrases = [
+            "> RE-CALIBRATING SENSORS...",
+            "> SEQUENCE VERIFIED.",
+            "> UPLOADING TO CORE...",
+            "> DATA INTEGRITY: 100%"
+        ];
+        
+        setInterval(() => {
+            const p = document.createElement('p');
+            p.className = 'text-[11px] text-outline opacity-60';
+            p.innerText = phrases[Math.floor(Math.random() * phrases.length)];
+            if(terminalOutput.children.length > 8) terminalOutput.removeChild(terminalOutput.children[2]);
+            terminalOutput.appendChild(p);
+        }, 4000);
+    </script>
+</body></html>

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>NOVU RESEARCH // OS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Geist:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body {
+            background-color: #09090b;
+            color: #e1e2ec;
+            overflow: hidden;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: repeat(12, 1fr);
+            gap: 12px;
+            height: calc(100vh - 80px);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #18181b;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #3f3f46;
+        }
+        .terminal-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 15px;
+            background: #4edea3;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(173, 198, 255, 0.1);
+            position: absolute;
+            top: 0;
+            z-index: 10;
+            pointer-events: none;
+            animation: scan 4s linear infinite;
+        }
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary": "#c0c1ff",
+                      "surface-container-low": "#191b23",
+                      "secondary-fixed-dim": "#4edea3",
+                      "on-secondary": "#003824",
+                      "on-background": "#e1e2ec",
+                      "error": "#ffb4ab",
+                      "background": "#10131a",
+                      "on-secondary-fixed": "#002113",
+                      "on-error-container": "#ffdad6",
+                      "on-secondary-fixed-variant": "#005236",
+                      "surface-bright": "#363941",
+                      "surface": "#10131a",
+                      "tertiary-container": "#8083ff",
+                      "surface-container-highest": "#32353c",
+                      "on-surface": "#e1e2ec",
+                      "on-tertiary-container": "#0d0096",
+                      "outline": "#8c909f",
+                      "error-container": "#93000a",
+                      "on-primary-fixed": "#001a42",
+                      "outline-variant": "#424754",
+                      "on-tertiary": "#1000a9",
+                      "surface-container-high": "#272a31",
+                      "on-secondary-container": "#00311f",
+                      "inverse-surface": "#e1e2ec",
+                      "on-primary-container": "#00285d",
+                      "on-primary-fixed-variant": "#004395",
+                      "surface-dim": "#10131a",
+                      "secondary-container": "#00a572",
+                      "primary": "#adc6ff",
+                      "on-tertiary-fixed": "#07006c",
+                      "secondary": "#4edea3",
+                      "surface-container-lowest": "#0b0e15",
+                      "primary-container": "#4d8eff",
+                      "on-error": "#690005",
+                      "tertiary-fixed-dim": "#c0c1ff",
+                      "surface-tint": "#adc6ff",
+                      "surface-container": "#1d2027",
+                      "on-primary": "#002e6a",
+                      "inverse-primary": "#005ac2",
+                      "primary-fixed": "#d8e2ff",
+                      "secondary-fixed": "#6ffbbe",
+                      "surface-variant": "#32353c",
+                      "tertiary-fixed": "#e1e0ff",
+                      "on-tertiary-fixed-variant": "#2f2ebe",
+                      "inverse-on-surface": "#2e3038",
+                      "primary-fixed-dim": "#adc6ff",
+                      "on-surface-variant": "#c2c6d6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "unit": "4px",
+                      "gutter": "16px",
+                      "margin-desktop": "32px",
+                      "bento-gap": "12px",
+                      "margin-mobile": "16px"
+              },
+              "fontFamily": {
+                      "display": ["Geist"],
+                      "body-lg": ["Geist"],
+                      "headline-lg-mobile": ["Geist"],
+                      "data-md": ["JetBrains Mono"],
+                      "headline-md": ["Geist"],
+                      "label-caps": ["JetBrains Mono"],
+                      "headline-lg": ["Geist"],
+                      "data-lg": ["JetBrains Mono"],
+                      "body-md": ["Geist"]
+              },
+              "fontSize": {
+                      "display": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "headline-lg-mobile": ["24px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                      "data-md": ["13px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                      "headline-md": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                      "label-caps": ["11px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                      "data-lg": ["16px", {"lineHeight": "1.4", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                      "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+</head>
+<body class="font-body-md text-on-surface selection:bg-primary/30 selection:text-primary-container">
+<!-- Top Navigation Bar -->
+<header class="bg-surface-container-lowest dark:bg-surface-container-lowest text-primary dark:text-primary font-display text-display font-headline-md text-headline-md docked full-width top-0 border-b border-outline-variant dark:border-outline-variant flat no shadows flex justify-between items-center h-16 px-margin-desktop w-full z-50 fixed">
+<div class="flex items-center gap-8">
+<span class="font-label-caps text-label-caps tracking-widest text-secondary dark:text-secondary uppercase">OS // RESEARCH</span>
+<div class="flex items-center bg-surface-container-high px-4 py-2 rounded-none border border-outline-variant w-96 gap-3">
+<span class="material-symbols-outlined text-outline text-lg">search</span>
+<input class="bg-transparent border-none outline-none text-data-md font-data-md placeholder:text-outline-variant focus:ring-0 w-full" placeholder="NOVU BRAIN // SEARCH" type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-on-surface-variant hover:bg-surface-bright/10 transition-colors cursor-pointer p-2">memory</span>
+<span class="material-symbols-outlined text-on-surface-variant hover:bg-surface-bright/10 transition-colors cursor-pointer p-2">sensors</span>
+<span class="material-symbols-outlined text-on-surface-variant hover:bg-surface-bright/10 transition-colors cursor-pointer p-2">potted_plant</span>
+</div>
+<div class="h-8 w-8 bg-primary rounded-none overflow-hidden border border-outline-variant">
+<img alt="Researcher avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCUDB0bBA4yGqptf9nk28jGBqI-9X1ZxkUumuY2zgFdDp9UvLr5hGEtC1af14paf1yu8IuPywfdUBRbir_JdbE1__GYJEPC1itKzwuK5eHw9PFQn8PEOLfcptfUqSW4o0PT7MJ4go6Byc1BXw9PwnppzzOf6oja1W-Wp780knhq3D28D8rhz4yY3C8GbAmZ0COFE2lnSYbVkNhm5me7McQKYvoWqW2pyNqDnCMgoMPVUgWWetj06n6chKc6VGB0krqYdVhAyGloD4"/>
+</div>
+</div>
+</header>
+<!-- Side Navigation Bar -->
+<aside class="bg-surface-container-low dark:bg-surface-container-low text-secondary dark:text-secondary font-body-md text-body-md font-label-caps text-label-caps docked left-0 h-full w-64 border-r border-outline-variant dark:border-outline-variant flat no shadows fixed left-0 top-0 h-full flex flex-col pt-20 pb-8 z-40">
+<div class="px-6 mb-10">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 border border-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary">biotech</span>
+</div>
+<div>
+<div class="font-display text-headline-md font-bold text-on-surface">SEC-04</div>
+<div class="text-[10px] tracking-widest text-secondary">STATUS: ACTIVE</div>
+</div>
+</div>
+</div>
+<nav class="flex-1 flex flex-col gap-1">
+<div class="text-secondary bg-secondary-container/10 border-l-2 border-secondary px-6 py-3 cursor-pointer duration-200 ease-in-out flex items-center gap-3">
+<span class="material-symbols-outlined text-lg">genetics</span>
+<span>GENOMICS</span>
+</div>
+<div class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest/50 transition-all px-6 py-3 cursor-pointer duration-200 ease-in-out flex items-center gap-3">
+<span class="material-symbols-outlined text-lg">menu_book</span>
+<span>LITERATURE</span>
+</div>
+<div class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest/50 transition-all px-6 py-3 cursor-pointer duration-200 ease-in-out flex items-center gap-3">
+<span class="material-symbols-outlined text-lg">clinical_notes</span>
+<span>CLINICAL</span>
+</div>
+<div class="text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest/50 transition-all px-6 py-3 cursor-pointer duration-200 ease-in-out flex items-center gap-3">
+<span class="material-symbols-outlined text-lg">settings</span>
+<span>SYSTEM</span>
+</div>
+</nav>
+<div class="px-6 pt-4 border-t border-outline-variant mt-auto">
+<div class="text-[10px] font-data-md text-outline mb-2">COORD: 40.7128 N, 74.0060 W</div>
+<div class="text-[10px] font-data-md text-outline">UPTIME: 452:12:08</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-16 h-screen p-margin-desktop bg-surface overflow-hidden">
+<div class="bento-grid">
+<!-- SEC-04 // PROTEOMICS (Main Widget) -->
+<div class="col-span-8 row-span-7 bg-[#18181b] border border-[#27272a] p-4 relative overflow-hidden group">
+<div class="flex justify-between items-start mb-4">
+<div>
+<span class="font-label-caps text-label-caps text-tertiary">SEC-04 // PROTEOMICS</span>
+<h2 class="font-headline-md text-headline-md text-on-surface mt-1 uppercase">RECOMBINANT P53-L2 FOLD</h2>
+</div>
+<div class="flex gap-2">
+<span class="font-data-md text-data-md text-outline border border-outline-variant px-2 py-1">PDB: 2OCJ</span>
+<span class="font-data-md text-data-md text-secondary border border-secondary/30 px-2 py-1">RESOLUTION: 1.85Å</span>
+</div>
+</div>
+<div class="w-full h-[320px] bg-black/40 border border-outline-variant/30 flex items-center justify-center relative group-hover:border-tertiary/30 transition-all">
+<div class="scanline"></div>
+<img class="w-full h-full object-cover opacity-60 mix-blend-screen" data-alt="A sophisticated scientific visualization of a protein structure shown as a glowing blue wireframe model on a dark slate background. The image features high-tech HUD elements like floating data points, coordinate axes, and molecular bond lines in a cyberpunk aesthetic. The lighting is cold and clinical, with neon accents of cyan and white, creating a deep sense of complex laboratory simulation." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2cboae55SBlcg3BsAJecl3QWUfnRbuxmW_t4SlY87lv_xvDbfPZK2HNymv3qQpUst6tyilHSpFDhlIVsc9etJP29wdQLWf6r9iunKQmWlCzV1A7TypPlCqBrgYq6iRKww43WHu7YcXJXFUhieAqtIIp3UYXwSoZAz7VNj5e2y_M2qc8DYEXmQChAVSFZX3a95WoQgYpIwFq4bqNtIQ25B3Br1f0C2PKxaAfHpQ-TWFTRuNEbsOG1jmb_gl__sAr3WHN6AW3ezfqo"/>
+<!-- Corner Pips -->
+<div class="absolute top-2 left-2 w-4 h-4 border-t border-l border-tertiary"></div>
+<div class="absolute top-2 right-2 w-4 h-4 border-t border-r border-tertiary"></div>
+<div class="absolute bottom-2 left-2 w-4 h-4 border-b border-l border-tertiary"></div>
+<div class="absolute bottom-2 right-2 w-4 h-4 border-b border-r border-tertiary"></div>
+</div>
+<div class="grid grid-cols-4 gap-4 mt-6">
+<div class="border-l border-tertiary pl-3">
+<div class="text-[10px] font-label-caps text-outline uppercase">Chain Length</div>
+<div class="font-data-lg text-data-lg text-on-surface">393 AA</div>
+</div>
+<div class="border-l border-tertiary pl-3">
+<div class="text-[10px] font-label-caps text-outline uppercase">Helix Index</div>
+<div class="font-data-lg text-data-lg text-on-surface">12.4%</div>
+</div>
+<div class="border-l border-tertiary pl-3">
+<div class="text-[10px] font-label-caps text-outline uppercase">Sheet Density</div>
+<div class="font-data-lg text-data-lg text-on-surface">31.8%</div>
+</div>
+<div class="border-l border-tertiary pl-3">
+<div class="text-[10px] font-label-caps text-outline uppercase">Binding Aff</div>
+<div class="font-data-lg text-data-lg text-secondary">0.08 nM</div>
+</div>
+</div>
+</div>
+<!-- SEC-06 // AGENT_LOG (Right Sidebar) -->
+<div class="col-span-4 row-span-12 bg-[#18181b] border border-[#27272a] flex flex-col overflow-hidden">
+<div class="p-4 border-b border-[#27272a] flex justify-between items-center bg-surface-container-high/50">
+<span class="font-label-caps text-label-caps text-secondary">SEC-06 // AGENT_LOG</span>
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+</div>
+<div class="flex-1 font-data-md text-data-md p-4 overflow-y-auto custom-scrollbar bg-black/20" id="terminal-output">
+<div class="text-secondary mb-2">[09:21:04] INITIALIZING NOVU_CORE_OS...</div>
+<div class="text-outline mb-1">&gt;&gt; Handshaking with SEC-04 proteomics node...</div>
+<div class="text-secondary mb-2">[09:21:05] CONNECTION ESTABLISHED (latency: 12ms)</div>
+<div class="text-outline mb-1">&gt;&gt; Fetching variant table for TP53 loci...</div>
+<div class="text-tertiary mb-2">[09:21:08] PARSING 42,019 DATA POINTS...</div>
+<div class="text-on-surface mb-1">&gt;&gt; Found pathogenic mismatch at C.124A&gt;T</div>
+<div class="text-error mb-2">[09:21:12] WARNING: ANOMALOUS BINDING DETECTED</div>
+<div class="text-outline mb-1">&gt;&gt; Re-evaluating docking matrix...</div>
+<div class="text-outline mb-1">&gt;&gt; Optimizing molecular dynamics...</div>
+<div class="text-secondary mb-2">[09:21:15] SIMULATION STEP 01-A COMPLETE</div>
+<div class="text-on-surface flex items-center gap-1">&gt;&gt; awaiting user command<span class="terminal-cursor"></span></div>
+</div>
+<div class="p-4 bg-surface-container-low border-t border-[#27272a]">
+<div class="flex gap-2">
+<span class="text-secondary font-data-md">sys@novu:~$</span>
+<input class="bg-transparent border-none outline-none text-data-md font-data-md w-full p-0 focus:ring-0" placeholder="..." type="text"/>
+</div>
+</div>
+</div>
+<!-- SEC-02 // GENOMICS (Bottom Left) -->
+<div class="col-span-4 row-span-5 bg-[#18181b] border border-[#27272a] p-4 flex flex-col">
+<div class="flex justify-between items-center mb-4">
+<span class="font-label-caps text-label-caps text-primary">SEC-02 // GENOMICS</span>
+<span class="material-symbols-outlined text-outline text-lg">genetics</span>
+</div>
+<div class="flex-1 overflow-x-auto">
+<table class="w-full text-left font-data-md text-[12px]">
+<thead>
+<tr class="text-outline border-b border-outline-variant">
+<th class="pb-2 font-medium">VARIANT</th>
+<th class="pb-2 font-medium">FREQ</th>
+<th class="pb-2 font-medium">CLINVAR</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/10">
+<tr>
+<td class="py-2 text-primary">R175H</td>
+<td class="py-2">0.024</td>
+<td class="py-2"><span class="bg-error/10 text-error px-1 border border-error/20">PATHOGENIC</span></td>
+</tr>
+<tr>
+<td class="py-2 text-primary">R273H</td>
+<td class="py-2">0.019</td>
+<td class="py-2"><span class="bg-error/10 text-error px-1 border border-error/20">PATHOGENIC</span></td>
+</tr>
+<tr>
+<td class="py-2 text-primary">R248Q</td>
+<td class="py-2">0.015</td>
+<td class="py-2"><span class="bg-tertiary/10 text-tertiary px-1 border border-tertiary/20">VUS</span></td>
+</tr>
+<tr>
+<td class="py-2 text-primary">Y220C</td>
+<td class="py-2">0.008</td>
+<td class="py-2"><span class="bg-secondary/10 text-secondary px-1 border border-secondary/20">BENIGN</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- SEC-01 // LITERATURE (Bottom Mid) -->
+<div class="col-span-4 row-span-5 bg-[#18181b] border border-[#27272a] p-4 flex flex-col overflow-hidden">
+<div class="flex justify-between items-center mb-4">
+<span class="font-label-caps text-label-caps text-on-surface-variant">SEC-01 // LITERATURE</span>
+<span class="material-symbols-outlined text-outline text-lg">menu_book</span>
+</div>
+<div class="space-y-4 overflow-y-auto custom-scrollbar flex-1 pr-2">
+<div class="border-l-2 border-outline-variant pl-3 py-1 hover:border-primary transition-colors cursor-pointer">
+<div class="text-[10px] text-outline font-data-md">Nature Genetics · 2h ago</div>
+<div class="font-headline-md text-body-md text-on-surface leading-tight mt-1">Novel structural insights into p53 inactivation mechanisms...</div>
+</div>
+<div class="border-l-2 border-outline-variant pl-3 py-1 hover:border-primary transition-colors cursor-pointer">
+<div class="text-[10px] text-outline font-data-md">Cell Reports · 5h ago</div>
+<div class="font-headline-md text-body-md text-on-surface leading-tight mt-1">Chromatin remodeling by the NuRD complex in development...</div>
+</div>
+<div class="border-l-2 border-outline-variant pl-3 py-1 hover:border-primary transition-colors cursor-pointer">
+<div class="text-[10px] text-outline font-data-md">Science · 1d ago</div>
+<div class="font-headline-md text-body-md text-on-surface leading-tight mt-1">High-throughput screening of CRISPR-Cas9 libraries...</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SEC-05 // CLINICAL_PHASE Floating Drawer -->
+<div class="fixed bottom-0 left-64 right-0 h-16 bg-surface-container-high border-t border-outline-variant px-8 flex items-center justify-between z-30">
+<div class="flex items-center gap-6">
+<span class="font-label-caps text-label-caps text-secondary">SEC-05 // CLINICAL_PHASE</span>
+<div class="flex items-center gap-2">
+<div class="h-1 w-12 bg-secondary/40 rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-full"></div>
+</div>
+<span class="text-[10px] font-data-md">PHASE I</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="h-1 w-12 bg-secondary/40 rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-3/4"></div>
+</div>
+<span class="text-[10px] font-data-md">PHASE II</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="h-1 w-12 bg-outline-variant rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-0"></div>
+</div>
+<span class="text-[10px] font-data-md text-outline-variant">PHASE III</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex -space-x-2">
+<img class="w-6 h-6 rounded-none border border-background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDeDuajvc1-xf9N8-wEXS6NeL6iFMHTzOhrvPI0hj7HMOSJH_asECyB6mjaT3kOf2FaYj9HQt8fbjWv3Pkrs2EReu2hnFEv4LRl_s9l6d5CJJFVBTNytZbV3uALHohAq_UOID7rHQgZFavUKEhGXe1YLzxhuYVw6ro1w1OqaMQj7K6v5zy0n06FkKnc_HKt9nlyWjt9s-9Ck_eYAoxu4lxEOBA3a2F2K85AMenZnHPdMzsUl__EIFqsNWPwNshwz3N_9OvmS6sG-aw"/>
+<img class="w-6 h-6 rounded-none border border-background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCF6KhPbq0sg0GxqCPiwPssbsnU4NcX69YHcYlzewePsCIZBQG8kBI3oFcKR9dI2WVd3IuHuM4XEuWXRqS8UqmSgkjQsZWVYYRCGHS_mxQ9F4wuBQC0KndTi1FSzTVwo_KPFFlOUIYir-iBsux5lSy7wa6187c2T4htN6MfDdFl20CWcvRVGJutmCL6KogbROa2ly9qbGPdNeZpSzdKWS-wyAPdBOTWObF5_VR3K3ERZGkCL-ZhL40nl4iryX7OEGaiTWOZq3jqvrE"/>
+<img class="w-6 h-6 rounded-none border border-background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbVb_wIHK4W0pOVXmhtqnR93ZlCr5XKlkkesByX4uXCgYTRxor3kpDJHiLLHm9MVdfFKI1ICZCt6s_seV03FvDJi-6YB5sxlu8omd7TKshKim8SlDYVU7Am_HRCmHu5dOQVxi87UuA6JueKD4XMOSn6cFWaypF25Ndr6fYePb-3hAfKvnKgVh6BSF82HVvG3E7xFzKWYqUqQKti01W-A7LHcIjwfvY_ufRwSHQ2AWi139dGUkBhCpLwgHrYaOjDy4Ka8yTinFEil0"/>
+</div>
+<button class="bg-secondary text-on-secondary px-4 py-1 font-label-caps text-label-caps hover:brightness-110 transition-all border border-secondary shadow-[0_0_10px_rgba(78,222,163,0.3)]">
+                    DEPLOY_COMPOUND
+                </button>
+</div>
+</div>
+</main>
+<script>
+        // Terminal Emulation
+        const logEntries = [
+            "[09:21:20] DETECTING LIGAND DOCKING SITE...",
+            "[09:21:24] BINDING ENERGY CALCULATED: -8.4 kcal/mol",
+            "[09:21:30] RUNNING MONTE CARLO SIMULATION...",
+            "[09:21:35] PHASE II RECRUITMENT AT 84%",
+            "[09:21:40] NEW VARIANT IDENTIFIED: G245S",
+            "[09:21:45] CROSS-REFERENCING LITERATURE DATABASE..."
+        ];
+        
+        const terminalOutput = document.getElementById('terminal-output');
+        let index = 0;
+
+        function addLog() {
+            if (index < logEntries.length) {
+                const div = document.createElement('div');
+                div.className = index % 2 === 0 ? 'text-secondary mb-2 opacity-0 transform translate-x-2 transition-all duration-300' : 'text-outline mb-1 opacity-0 transform translate-x-2 transition-all duration-300';
+                div.textContent = logEntries[index];
+                
+                // Add before the cursor/input line
+                const lastLine = terminalOutput.lastElementChild;
+                terminalOutput.insertBefore(div, lastLine);
+                
+                // Trigger animation
+                setTimeout(() => {
+                    div.classList.remove('opacity-0', 'translate-x-2');
+                }, 10);
+
+                index++;
+                terminalOutput.scrollTop = terminalOutput.scrollHeight;
+                
+                setTimeout(addLog, Math.random() * 3000 + 2000);
+            }
+        }
+
+        setTimeout(addLog, 2000);
+
+        // Interaction Glow Effect
+        document.querySelectorAll('.bg-[#18181b]').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,399 @@
+<!DOCTYPE html><html class="dark" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>NOVU BRAIN // GENOMICS EXPLORER</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Geist:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Style Guidance & Hierarchy Translation -->
+<style>
+        :root {
+            --bg-level-0: #09090b;
+            --bg-level-1: #18181b;
+            --bg-level-2: #1c1c1f;
+            --border: #27272a;
+            --border-hover: #3f3f46;
+        }
+        body {
+            background-color: var(--bg-level-0);
+            color: #e1e2ec;
+            overflow: hidden;
+        }
+        .bento-module {
+            background-color: var(--bg-level-1);
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
+        .bento-module:hover {
+            border-color: var(--border-hover);
+            box-shadow: inset 0 0 8px rgba(78, 222, 163, 0.05);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: var(--border);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: var(--border-hover);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glow-emerald {
+            box-shadow: 0 0 15px rgba(78, 222, 163, 0.2);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                "outline": "#8c909f",
+                "primary": "#adc6ff",
+                "secondary": "#4edea3",
+                "surface": "#10131a",
+                "surface-container-low": "#191b23",
+                "surface-container-lowest": "#0b0e15",
+                "outline-variant": "#424754",
+                "on-surface": "#e1e2ec",
+                "on-surface-variant": "#c2c6d6",
+                "secondary-container": "#00a572",
+              },
+              "spacing": {
+                "margin-desktop": "32px",
+                "bento-gap": "12px",
+              },
+              "fontFamily": {
+                "data-md": ["JetBrains Mono"],
+                "data-lg": ["JetBrains Mono"],
+                "label-caps": ["JetBrains Mono"],
+                "headline-md": ["Geist"],
+                "display": ["Geist"],
+              },
+            }
+          }
+        }
+    </script>
+</head>
+<body class="font-body-md text-on-surface">
+<!-- TopAppBar Shell -->
+<header class="fixed top-0 left-20 right-0 z-50 bg-surface flex justify-between items-center px-margin-desktop h-16 border-b border-outline-variant">
+<div class="flex items-center gap-6">
+<span class="font-display text-headline-md text-primary tracking-tighter">NOVU BRAIN</span>
+<div class="hidden md:flex items-center bg-surface-container-low px-4 py-1.5 border border-outline-variant">
+<span class="material-symbols-outlined text-outline mr-2 text-[18px]">search</span>
+<input class="bg-transparent border-none focus:ring-0 font-data-md text-data-md w-64 p-0 uppercase" placeholder="QUERY_GENOME_DATABASE..." type="text">
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="hover:bg-surface-variant/50 p-2 transition-colors duration-150 rounded">
+<span class="material-symbols-outlined text-primary">memory</span>
+</button>
+<button class="hover:bg-surface-variant/50 p-2 transition-colors duration-150 rounded">
+<span class="material-symbols-outlined text-primary">sensors</span>
+</button>
+<button class="hover:bg-surface-variant/50 p-2 transition-colors duration-150 rounded">
+<span class="material-symbols-outlined text-primary">dns</span>
+</button>
+<div class="w-8 h-8 border border-primary overflow-hidden">
+<img alt="Researcher" class="w-full h-full object-cover grayscale contrast-125" data-alt="A close-up, high-detail professional portrait of a senior research scientist in a dark, tech-oriented laboratory setting. The lighting is cold and clinical, with blue and green ambient glows from nearby computer monitors reflecting off his glasses. The aesthetic is sharp, cinematic, and emphasizes a high-tech, industrial research environment consistent with a futuristic genomics operating system." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpqFWxluo5vezs-cYOAHgfPb9BPK243N0zK0Ehm9dxoKm83Da3fYSSgBBaruv2kTDvNIhqMk4aRDnn1NhnKdraEENygpuiMDnFHEQsLmmOnwssJg6OuWOny2VlLRpFsLclDcciNZ4mxX1NZAPRvSJ-BYax10C6kJzZnTXc-AvW4A321wRbnKG0-_aTtH_fsHZ8M9kNYcafNcUy_L-5Kbgg6QbVFGPhBjBlfCRc52mhsSJUIXVq4Gp7fq7HgkqEOKyAKGokbikI2No">
+</div>
+</div>
+</header>
+<!-- SideNavBar Shell -->
+<nav class="fixed left-0 top-0 h-full w-20 flex flex-col items-center py-8 bg-surface-container-low border-r border-outline-variant z-[60]">
+<div class="mb-12 flex flex-col items-center gap-1">
+<span class="material-symbols-outlined text-secondary text-[32px]" style="font-variation-settings: 'FILL' 1;">biotech</span>
+<span class="font-data-lg text-[10px] text-secondary tracking-widest">NOVU-01</span>
+</div>
+<div class="flex flex-col w-full gap-4">
+<!-- Genomics Active -->
+<a class="group flex flex-col items-center py-4 text-secondary border-l-2 border-secondary bg-secondary-container/10 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mb-1">genetics</span>
+<span class="font-label-caps text-[9px] uppercase">Genomics</span>
+</a>
+<a class="group flex flex-col items-center py-4 text-on-surface-variant hover:text-secondary hover:bg-surface-variant/30 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mb-1">menu_book</span>
+<span class="font-label-caps text-[9px] uppercase">Literature</span>
+</a>
+<a class="group flex flex-col items-center py-4 text-on-surface-variant hover:text-secondary hover:bg-surface-variant/30 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mb-1">clinical_notes</span>
+<span class="font-label-caps text-[9px] uppercase">Clinical</span>
+</a>
+<a class="group flex flex-col items-center py-4 text-on-surface-variant hover:text-secondary hover:bg-surface-variant/30 transition-all duration-200" href="#">
+<span class="material-symbols-outlined mb-1">settings</span>
+<span class="font-label-caps text-[9px] uppercase">System</span>
+</a>
+</div>
+<div class="mt-auto flex flex-col w-full gap-4">
+<a class="flex flex-col items-center py-4 text-on-surface-variant hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined mb-1">terminal</span>
+<span class="font-label-caps text-[9px] uppercase">Logs</span>
+</a>
+<div class="px-4">
+<button class="w-full aspect-square border border-secondary text-secondary flex items-center justify-center hover:bg-secondary hover:text-surface transition-colors">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="ml-20 mt-16 p-bento-gap h-[calc(100vh-64px-32px)] grid grid-cols-12 gap-bento-gap overflow-hidden">
+<!-- Left: Primary Genomic Data (8 Columns) -->
+<div class="col-span-12 lg:col-span-9 flex flex-col gap-bento-gap overflow-y-auto custom-scrollbar pr-2">
+<!-- 1. Variant Detail Header -->
+<section class="bento-module p-6 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-2 opacity-20">
+<span class="font-label-caps text-[64px] text-secondary">TP53</span>
+</div>
+<div class="relative z-10">
+<div class="flex items-center gap-3 mb-2">
+<span class="font-label-caps text-secondary text-label-caps bg-secondary/10 px-2 py-0.5 border border-secondary/20">ACTIVE_TARGET</span>
+<span class="font-data-md text-outline">SEC-04 // GENOMICS</span>
+</div>
+<div class="flex items-end gap-6">
+<h1 class="font-display text-[56px] leading-none font-bold text-on-surface tracking-tighter">TP53</h1>
+<div class="flex flex-col mb-1">
+<span class="font-data-lg text-secondary">P53 PROTEIN</span>
+<span class="font-data-md text-outline">CLASSIFICATION: TUMOR SUPPRESSOR</span>
+</div>
+</div>
+<div class="mt-6 grid grid-cols-3 gap-8 border-t border-outline-variant pt-4">
+<div>
+<p class="font-label-caps text-outline text-[10px] mb-1">LOCUS</p>
+<p class="font-data-lg text-on-surface">17p13.1</p>
+</div>
+<div>
+<p class="font-label-caps text-outline text-[10px] mb-1">LENGTH</p>
+<p class="font-data-lg text-on-surface">25,760 bp</p>
+</div>
+<div>
+<p class="font-label-caps text-outline text-[10px] mb-1">EXONS</p>
+<p class="font-data-lg text-on-surface">11 TOTAL</p>
+</div>
+</div>
+</div>
+</section>
+<!-- 2. Sequence Map -->
+<section class="bento-module p-4">
+<div class="flex justify-between items-center mb-6">
+<span class="font-label-caps text-on-surface-variant flex items-center gap-2">
+<span class="w-1.5 h-1.5 bg-secondary"></span> STRUCTURE_MAP_V2.1
+                    </span>
+<span class="font-data-md text-outline">COORD: 7,661,779 - 7,687,538</span>
+</div>
+<div class="relative h-16 bg-surface-container flex items-center px-4 overflow-hidden border border-outline-variant/30">
+<!-- DNA Backbone -->
+<div class="absolute inset-0 opacity-10 flex items-center justify-around pointer-events-none">
+<div class="h-full w-px bg-outline"></div>
+<div class="h-full w-px bg-outline"></div>
+<div class="h-full w-px bg-outline"></div>
+<div class="h-full w-px bg-outline"></div>
+</div>
+<!-- Sequence Visualization -->
+<div class="flex-1 h-3 bg-zinc-800 relative flex items-center">
+<!-- Exons -->
+<div class="absolute left-[5%] w-[4%] h-full bg-secondary border border-secondary shadow-[0_0_8px_rgba(78,222,163,0.3)]"></div>
+<div class="absolute left-[15%] w-[8%] h-full bg-secondary border border-secondary"></div>
+<div class="absolute left-[28%] w-[12%] h-full bg-secondary border border-secondary"></div>
+<div class="absolute left-[45%] w-[6%] h-full bg-secondary border border-secondary"></div>
+<div class="absolute left-[55%] w-[15%] h-full bg-secondary border border-secondary"></div>
+<div class="absolute left-[75%] w-[10%] h-full bg-secondary border border-secondary"></div>
+<!-- Mutation Hotspots -->
+<div class="absolute left-[32%] -top-4 bottom-4 flex flex-col items-center">
+<span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse glow-emerald" style="box-shadow: 0 0 10px #ef4444;"></span>
+<div class="h-full w-px bg-red-500/50"></div>
+<span class="font-label-caps text-[9px] text-red-400 mt-1">R175H</span>
+</div>
+<div class="absolute left-[58%] -top-4 bottom-4 flex flex-col items-center">
+<span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" style="box-shadow: 0 0 10px #ef4444;"></span>
+<div class="h-full w-px bg-red-500/50"></div>
+<span class="font-label-caps text-[9px] text-red-400 mt-1">R248Q</span>
+</div>
+<div class="absolute left-[62%] -top-4 bottom-4 flex flex-col items-center">
+<span class="w-1.5 h-1.5 rounded-full bg-orange-500" style="box-shadow: 0 0 10px #f97316;"></span>
+<div class="h-full w-px bg-orange-500/50"></div>
+<span class="font-label-caps text-[9px] text-orange-400 mt-1">R273H</span>
+</div>
+</div>
+</div>
+<div class="mt-2 flex justify-between font-data-md text-[10px] text-outline px-4">
+<span class="">5' UTR</span>
+<span class="">3' UTR</span>
+</div>
+</section>
+<!-- 3. Advanced Variant Table -->
+<section class="bento-module flex flex-col overflow-hidden">
+<div class="px-4 py-3 border-b border-outline-variant bg-surface-container-low flex justify-between items-center"><span class="font-label-caps text-on-surface-variant">VARIANT_LEDGER</span><div class="flex items-center gap-4"><div class="flex items-center bg-surface-container-lowest border border-outline-variant px-2 py-0.5"><span class="material-symbols-outlined text-[14px] text-outline mr-1">search</span><input type="text" placeholder="SEARCH_VARIANTS..." class="bg-transparent border-none focus:ring-0 font-data-md text-[10px] text-on-surface p-0 w-32 uppercase"></div><button class="text-secondary font-label-caps text-[11px] hover:underline">EXPORT_CSV</button></div></div>
+<div class="px-4 py-2 flex gap-2 border-b border-outline-variant bg-surface/30">
+    <button class="px-2 py-0.5 text-[9px] font-label-caps border border-secondary bg-secondary/20 text-secondary hover:bg-secondary/30 transition-all">ALL</button>
+    <button class="px-2 py-0.5 text-[9px] font-label-caps border border-outline-variant text-outline hover:border-secondary hover:text-secondary transition-all">PATHOGENIC</button>
+    <button class="px-2 py-0.5 text-[9px] font-label-caps border border-outline-variant text-outline hover:border-secondary hover:text-secondary transition-all">VUS</button>
+    <button class="px-2 py-0.5 text-[9px] font-label-caps border border-outline-variant text-outline hover:border-secondary hover:text-secondary transition-all">BENIGN</button>
+</div><div class="overflow-x-auto">
+<table class="w-full text-left font-data-md text-data-md">
+<thead>
+<tr class="bg-surface-container-highest/30 border-b border-outline-variant">
+<th class="p-4 font-label-caps text-outline font-bold">VARIANT</th>
+<th class="p-4 font-label-caps text-outline font-bold">CONSEQUENCE</th>
+<th class="p-4 font-label-caps text-outline font-bold">CLINVAR</th>
+<th class="p-4 font-label-caps text-outline font-bold">GNOMAD FREQ</th>
+<th class="p-4 font-label-caps text-outline font-bold">RSID</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/30">
+<tr class="hover:bg-surface-variant/20 transition-colors">
+<td class="p-4 text-on-surface font-bold">R175H</td>
+<td class="p-4 text-on-surface-variant">Missense</td>
+<td class="p-4"><span class="text-secondary bg-secondary/10 border border-secondary/20 px-2 py-0.5 text-[10px] font-bold">PATHOGENIC</span></td>
+<td class="p-4 text-on-surface-variant">0.00032</td>
+<td class="p-4 text-primary underline">rs28934571</td>
+</tr>
+<tr class="hover:bg-surface-variant/20 transition-colors">
+<td class="p-4 text-on-surface font-bold">R248Q</td>
+<td class="p-4 text-on-surface-variant">Missense</td>
+<td class="p-4"><span class="text-secondary bg-secondary/10 border border-secondary/20 px-2 py-0.5 text-[10px] font-bold">PATHOGENIC</span></td>
+<td class="p-4 text-on-surface-variant">0.00004</td>
+<td class="p-4 text-primary underline">rs28934572</td>
+</tr>
+<tr class="hover:bg-surface-variant/20 transition-colors">
+<td class="p-4 text-on-surface font-bold">Y220C</td>
+<td class="p-4 text-on-surface-variant">Missense</td>
+<td class="p-4"><span class="text-secondary bg-secondary/10 border border-secondary/20 px-2 py-0.5 text-[10px] font-bold">PATHOGENIC</span></td>
+<td class="p-4 text-on-surface-variant">0.00001</td>
+<td class="p-4 text-primary underline">rs121912666</td>
+</tr>
+<tr class="hover:bg-surface-variant/20 transition-colors">
+<td class="p-4 text-on-surface font-bold">G245S</td>
+<td class="p-4 text-on-surface-variant">Missense</td>
+<td class="p-4"><span class="text-orange-400 bg-orange-400/10 border border-orange-400/20 px-2 py-0.5 text-[10px] font-bold">LIKELY_PATH</span></td>
+<td class="p-4 text-on-surface-variant">0.00000</td>
+<td class="p-4 text-primary underline">rs28934575</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- 4. Population Frequency Chart -->
+<section class="bento-module p-4 h-64">
+<span class="font-label-caps text-on-surface-variant mb-6 block">POPULATION_DISTRIBUTION // GNOMAD_V3</span>
+<div class="flex items-end justify-between h-40 gap-4 px-4">
+<div class="flex-1 flex flex-col items-center">
+<div class="w-full bg-secondary/20 border border-secondary/30 relative" style="height: 85%;">
+<div class="absolute bottom-0 w-full bg-secondary" style="height: 100%;"></div>
+</div>
+<span class="font-label-caps text-[9px] mt-2 text-outline">AFR</span>
+</div>
+<div class="flex-1 flex flex-col items-center">
+<div class="w-full bg-secondary/20 border border-secondary/30 relative" style="height: 85%;">
+<div class="absolute bottom-0 w-full bg-secondary" style="height: 45%;"></div>
+</div>
+<span class="font-label-caps text-[9px] mt-2 text-outline">AMR</span>
+</div>
+<div class="flex-1 flex flex-col items-center">
+<div class="w-full bg-secondary/20 border border-secondary/30 relative" style="height: 85%;">
+<div class="absolute bottom-0 w-full bg-secondary" style="height: 12%;"></div>
+</div>
+<span class="font-label-caps text-[9px] mt-2 text-outline">EAS</span>
+</div>
+<div class="flex-1 flex flex-col items-center">
+<div class="w-full bg-secondary/20 border border-secondary/30 relative" style="height: 85%;">
+<div class="absolute bottom-0 w-full bg-secondary" style="height: 60%;"></div>
+</div>
+<span class="font-label-caps text-[9px] mt-2 text-outline">FIN</span>
+</div>
+<div class="flex-1 flex flex-col items-center">
+<div class="w-full bg-secondary/20 border border-secondary/30 relative" style="height: 85%;">
+<div class="absolute bottom-0 w-full bg-secondary" style="height: 75%;"></div>
+</div>
+<span class="font-label-caps text-[9px] mt-2 text-outline">NFE</span>
+</div>
+<div class="flex-1 flex flex-col items-center">
+<div class="w-full bg-secondary/20 border border-secondary/30 relative" style="height: 85%;">
+<div class="absolute bottom-0 w-full bg-secondary" style="height: 30%;"></div>
+</div>
+<span class="font-label-caps text-[9px] mt-2 text-outline">SAS</span>
+</div>
+</div>
+</section>
+</div>
+<!-- Right: AGENT_LOG Sidebar (3 Columns) -->
+<aside class="hidden lg:flex col-span-3 flex-col gap-bento-gap h-full overflow-hidden">
+<div class="bento-module flex-1 flex flex-col overflow-hidden">
+<div class="px-4 py-3 border-b border-outline-variant bg-surface-container-low flex items-center justify-between">
+<span class="font-label-caps text-secondary flex items-center gap-2">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
+</span>
+                        AGENT_LOG
+                    </span>
+<span class="font-data-md text-[10px] text-outline">V2.4.0</span>
+</div>
+<div class="flex-1 p-4 font-data-md text-[12px] text-secondary/80 overflow-y-auto custom-scrollbar space-y-2 leading-relaxed" id="terminal">
+<p class="text-white">Scanning population specific frequencies...</p>
+<p class="text-secondary/40">_</p>
+<p class=""><span class="text-outline">[02:42:21]</span> TP53: LOH analysis complete.</p><p class=""><span class="text-outline">[02:42:25]</span> TP53: LOH analysis complete.</p><p class=""><span class="text-outline">[02:42:28]</span> Checking somatic variant database...</p><p class=""><span class="text-outline">[02:42:32]</span> TP53: LOH analysis complete.</p><p class=""><span class="text-outline">[02:42:35]</span> Syncing with ClinVar v2024-Q3...</p><p class=""><span class="text-outline">[02:42:39]</span> Recalculating allele frequencies for AMR sub-pop...</p><p class=""><span class="text-outline">[02:42:42]</span> Syncing with ClinVar v2024-Q3...</p><p class=""><span class="text-outline">[02:42:46]</span> Scanning for compensatory mutations...</p><p class=""><span class="text-outline">[02:42:49]</span> TP53: LOH analysis complete.</p><p class=""><span class="text-outline">[02:42:53]</span> Visualizing protein-DNA binding interface...</p><p class=""><span class="text-outline">[02:42:56]</span> Recalculating allele frequencies for AMR sub-pop...</p><p class=""><span class="text-outline">[02:43:00]</span> Checking somatic variant database...</p><p class=""><span class="text-outline">[02:43:03]</span> Scanning for compensatory mutations...</p><p class=""><span class="text-outline">[02:43:07]</span> TP53: LOH analysis complete.</p><p class=""><span class="text-outline">[02:43:10]</span> Checking somatic variant database...</p><p class=""><span class="text-outline">[02:43:14]</span> Syncing with ClinVar v2024-Q3...</p><p class=""><span class="text-outline">[02:43:17]</span> Checking somatic variant database...</p><p class=""><span class="text-outline">[02:43:21]</span> Scanning for compensatory mutations...</p><p class=""><span class="text-outline">[02:43:24]</span> Checking somatic variant database...</p><p class=""><span class="text-outline">[02:43:29]</span> TP53: LOH analysis complete.</p><p class=""><span class="text-outline">[02:43:31]</span> Scanning for compensatory mutations...</p><p class=""><span class="text-outline">[02:43:35]</span> Syncing with ClinVar v2024-Q3...</p><p class=""><span class="text-outline">[02:43:38]</span> Syncing with ClinVar v2024-Q3...</p><p class=""><span class="text-outline">[02:43:42]</span> Recalculating allele frequencies for AMR sub-pop...</p><p class=""><span class="text-outline">[02:43:45]</span> Checking somatic variant database...</p><p class=""><span class="text-outline">[02:43:49]</span> Checking somatic variant database...</p><p class=""><span class="text-outline">[02:43:52]</span> Visualizing protein-DNA binding interface...</p><p class=""><span class="text-outline">[02:43:56]</span> Checking somatic variant database...</p><p class=""><span class="text-outline">[02:43:59]</span> Visualizing protein-DNA binding interface...</p><p class=""><span class="text-outline">[02:44:03]</span> TP53: LOH analysis complete.</p><p class=""><span class="text-outline">[02:44:06]</span> Checking somatic variant database...</p><p class=""><span class="text-outline">[02:44:10]</span> Syncing with ClinVar v2024-Q3...</p></div>
+<div class="p-3 border-t border-outline-variant bg-surface-container-low">
+<div class="flex items-center gap-2 border border-outline-variant px-2 py-1">
+<span class="text-secondary font-data-md">$</span>
+<input class="bg-transparent border-none focus:ring-0 font-data-md text-data-md text-on-surface w-full p-0" placeholder="COMMAND..." type="text">
+</div>
+</div>
+</div>
+<!-- Mini 3D Protein Preview (Placeholder) -->
+<div class="bento-module h-48 relative group overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-secondary/10 to-transparent"></div>
+<img alt="Protein Structure" class="w-full h-full object-cover grayscale brightness-50 group-hover:scale-110 transition-transform duration-700" data-alt="A high-contrast, scientific rendering of a complex 3D protein structure, specifically the p53 tumor suppressor protein. The style is minimalist and industrial, featuring thin glowing emerald wireframes against a pitch-black background. Particles of light suggest biochemical activity, and the lighting is dramatic, emphasizing the intricate folds and binding domains of the molecule." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGHv-x8wP85lj-isKijX2u0kTU0MciY9_g8p9BOaR6bRy8Bs5uTIM0HUslpyVXj_LnWqRTWnHh-_NDQ9aJ2QmyDBBK9-ZlzqyEV_80N25LCxoP9z2UK3M5LDqoyuKPyKKiEZDjMd-gDAQF_SGda_kbg7PNcUa8jEN3W2LGuUvQ-mA4HEiDrLZwYyNdIkrKbaTSrrGRx1v8dV7SP2bGcAdCLDNwdEDJM4hVcsLN4ydkjdsPpylhBBAcgS-DO1RU1PGicBUOFuRxrs8">
+<div class="absolute top-2 left-2 font-label-caps text-[9px] text-secondary bg-surface/80 px-2 py-0.5">STRUCTURE_RENDER: P53_DOMAIN</div>
+<div class="absolute bottom-2 right-2">
+<span class="material-symbols-outlined text-secondary hover:scale-110 cursor-pointer">view_in_ar</span>
+</div>
+</div>
+</aside>
+</main>
+<!-- Footer Shell -->
+<footer class="fixed bottom-0 left-20 right-0 h-8 flex justify-between items-center px-margin-desktop bg-surface-container-lowest border-t border-outline-variant z-50 font-data-md text-data-md text-outline">
+<div class="flex items-center gap-6">
+<span class="font-label-caps text-[10px] uppercase">NOVU_OS_V2.4 // UPTIME: 144:12:05</span>
+<span class="flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                SEC_AUTH: ACTIVE
+            </span>
+</div>
+<div class="flex items-center gap-6">
+<span class="hover:text-primary cursor-default">COORD: 42.3601 N, 71.0589 W</span>
+<span class="material-symbols-outlined text-[14px]">notifications</span>
+</div>
+</footer>
+<script>
+        // Micro-interactions for terminal
+        const terminal = document.getElementById('terminal');
+        const logs = [
+            "Syncing with ClinVar v2024-Q3...",
+            "Checking somatic variant database...",
+            "Recalculating allele frequencies for AMR sub-pop...",
+            "TP53: LOH analysis complete.",
+            "Visualizing protein-DNA binding interface...",
+            "Scanning for compensatory mutations..."
+        ];
+
+        setInterval(() => {
+            const p = document.createElement('p');
+            const now = new Date();
+            const time = `[${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}]`;
+            p.innerHTML = `<span class="text-outline">${time}</span> ${logs[Math.floor(Math.random() * logs.length)]}`;
+            terminal.appendChild(p);
+            terminal.scrollTop = terminal.scrollHeight;
+            if (terminal.children.length > 25) {
+                terminal.removeChild(terminal.firstChild);
+            }
+        }, 3500);
+    </script>
+
+
+</body></html>
